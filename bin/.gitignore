@@ -1,0 +1,23 @@
+# IntelliJ 설정 파일
+.idea/
+*.iml
+
+# Eclipse 설정 파일
+.classpath
+.project
+.settings/
+
+# Mac 시스템 파일
+.DS_Store
+
+# Windows 시스템 파일
+Thumbs.db
+desktop.ini
+
+# 컴파일된 파일
+*.class
+out/
+
+# 빌드 결과물
+build/
+target/
