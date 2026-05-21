@@ -16,6 +16,7 @@ desktop.ini
 
 # 컴파일된 파일
 *.class
+bin/
 out/
 
 # 빌드 결과물

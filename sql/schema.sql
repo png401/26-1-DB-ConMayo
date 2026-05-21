@@ -21,8 +21,8 @@ CREATE TABLE IF NOT EXISTS member (
 -- 공연장 테이블
 CREATE TABLE IF NOT EXISTS venue (
 	venue_id INT AUTO_INCREMENT PRIMARY KEY,
-	venue_name VARCHAR(100) UNIQUE,
-	address VARCHAR(255)
+	venue_name VARCHAR(100) NOT NULL UNIQUE,
+	address VARCHAR(255) NOT NULL
 	);
 
 
@@ -89,7 +89,7 @@ CREATE TABLE IF NOT EXISTS review (
 		seat_rating BETWEEN 1 AND 5
 		),
 	written_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-	content TEXT NOT NULL,
+	content TEXT,
 	FOREIGN KEY(booking_id) REFERENCES booking(booking_id)
 	);
 	
@@ -102,6 +102,6 @@ CREATE TABLE IF NOT EXISTS cancellation (
 	cancellation_fee INT NOT NULL DEFAULT 0,
 	cancel_status ENUM(
 		'REQUESTED', 'PENDING_REFUND', 'REFUNDED'
-		),
+		) NOT NULL DEFAULT 'REQUESTED',
 	FOREIGN KEY(booking_id) REFERENCES booking(booking_id)
 	);
