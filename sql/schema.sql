@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS member (
 -- 공연장 테이블
 CREATE TABLE IF NOT EXISTS venue (
 	venue_id INT AUTO_INCREMENT PRIMARY KEY,
-	venue_name VARCHAR(100) NOT NULL,
+	venue_name VARCHAR(100) NOT NULL UNIQUE,
 	address VARCHAR(255) NOT NULL
 	);
 
@@ -32,7 +32,7 @@ CREATE TABLE IF NOT EXISTS performance (
 	title VARCHAR(255) NOT NULL,
 	category VARCHAR(20) NOT NULL,
 	start_time DATETIME NOT NULL,
-	running_time INT NOT NULL,
+	running_time INT NOT NULL CHECK (running_time >= 0),
 	sales_status ENUM(
 		'OPEN', 'CLOSED', 'SOLD_OUT', 'COMING_SOON'
 		) NOT NULL,
