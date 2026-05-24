@@ -62,3 +62,9 @@ VALUES
 (1, 4, 'HOLD', '2026-05-22 10:55:00', 320000),
 (1, 5, 'HOLD', '2026-05-22 10:56:00', -5000);
 -- 현재는 유효하지 않은 금액도 전부 추가됨.
+
+-- 예매 시각(booked_at)으로부터 5분이 지났는데도 여전히 HOLD 상태인 쓰레기 데이터 처리
+-- 깔끔하게 지우기 - DELETE (데이터 용량 절약)
+DELETE FROM booking
+WHERE booking_status = 'HOLD' 
+  AND booked_at < NOW() - INTERVAL 5 MINUTE;
