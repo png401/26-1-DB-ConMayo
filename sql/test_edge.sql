@@ -68,6 +68,12 @@ USE conmayo;
 -- [실패 okay] 동일 공연에 동일 좌석 중복 등록 (UNIQUE 위반)
 -- INSERT INTO performance_seat (performance_id, seat_id, price) VALUES (1, 1, 999999);
 
+-- [실패 okay] 존재하지 않는 performance_id (FK 위반)
+-- INSERT INTO performance_seat (performance_id, seat_id, price) VALUES (999, 1, 220000);
+
+-- [실패 okay] 존재하지 않는 seat_id (FK 위반)
+-- INSERT INTO performance_seat (performance_id, seat_id, price) VALUES (1, 999, 220000);
+
 -- [코드로 차단] 공연장 불일치 좌석 연결 — 공연1(KSPO DOME)에 세종문화회관 좌석(seat_id=23) 연결 (DB는 허용)
 -- INSERT INTO performance_seat (performance_id, seat_id, price) VALUES (1, 23, 50000);
 
@@ -160,3 +166,16 @@ USE conmayo;
 -- [실패 okay] 잘못된 cancel_status ENUM 값
 -- INSERT INTO cancellation (booking_id, refund_amount, cancellation_fee, cancel_status)
 -- VALUES (22, 165000, 0, 'DONE');
+
+
+-- =============================================================
+--  VENUE
+-- =============================================================
+-- [실패 okay] 이름과 주소가 동시에 똑같은 공연장 중복 등록 차단(복합 UNIQUE 위반)
+-- INSERT INTO venue (name, address, total_seats) VALUES ('KSPO DOME', '서울 송파구 올림픽로 424', 15000);
+
+-- [실패 okay] : 공연 데이터가 연결되어 있는 공연장 삭제 시도 (RESTRICT 위반)
+-- DELETE FROM venue WHERE venue_id = 1;
+
+-- [실패 okay] : 좌석 데이터가 생성되어 있는 공연장 삭제 시도 (RESTRICT 위반)
+-- DELETE FROM venue WHERE venue_id = 1;
