@@ -21,8 +21,9 @@ CREATE TABLE IF NOT EXISTS member (
 -- 공연장 테이블
 CREATE TABLE IF NOT EXISTS venue (
 	venue_id INT AUTO_INCREMENT PRIMARY KEY,
-	venue_name VARCHAR(100) NOT NULL UNIQUE,
-	address VARCHAR(255) NOT NULL
+	venue_name VARCHAR(100) NOT NULL,
+	address VARCHAR(255) NOT NULL,
+	CONSTRAINT uq_venue_name_address UNIQUE (venue_name, address)
 	);
 
 
@@ -38,7 +39,8 @@ CREATE TABLE IF NOT EXISTS performance (
 		) NOT NULL,
 	booking_open DATETIME NOT NULL,
 	venue_id INT NOT NULL,
-	FOREIGN KEY(venue_id) REFERENCES venue(venue_id)
+	CONSTRAINT chk_booking_time CHECK (booking_open < start_time),
+	FOREIGN KEY(venue_id) REFERENCES venue(venue_id) ON DELETE RESTRICT
 	);
 	
 
@@ -49,8 +51,8 @@ CREATE TABLE IF NOT EXISTS seat (
 	section VARCHAR(10) NOT NULL,
 	row_num INT NOT NULL CHECK (row_num >= 1),
 	col_num INT NOT NULL CHECK (col_num >= 1),
-	FOREIGN KEY(venue_id) REFERENCES venue(venue_id),
-	UNIQUE (venue_id, section, row_num, col_num)
+	UNIQUE (venue_id, section, row_num, col_num),
+	FOREIGN KEY(venue_id) REFERENCES venue(venue_id) ON DELETE RESTRICT
 	);
 	
 	
@@ -60,9 +62,9 @@ CREATE TABLE IF NOT EXISTS performance_seat (
 	performance_id INT NOT NULL,
 	seat_id INT NOT NULL,
 	price INT NOT NULL,
-	FOREIGN KEY(performance_id) REFERENCES performance(performance_id),
-	FOREIGN KEY(seat_id) REFERENCES seat(seat_id),
-	UNIQUE (performance_id, seat_id)
+	UNIQUE (performance_id, seat_id),
+	FOREIGN KEY(performance_id) REFERENCES performance(performance_id) ON DELETE CASCADE,
+	FOREIGN KEY(seat_id) REFERENCES seat(seat_id) ON DELETE CASCADE
 	);
 	
 	
