@@ -64,7 +64,7 @@ GROUP BY booking_id
 HAVING cnt > 1;
 
 -- 공연 전 작성된 리뷰 탐지
--- review_id=6 → '⚠ 공연 전 리뷰' 탐지되면 okay (코드로 막아야 함)
+-- review_id=6 → '공연 전 리뷰' 탐지되면 okay (코드로 막아야 함)
 SELECT
     r.review_id,
     r.booking_id,
@@ -87,7 +87,7 @@ FROM review r
 JOIN booking b ON b.booking_id = r.booking_id;
 
 -- 공연장 불일치 좌석 탐지
--- TC-PS-02에서 넣은 데이터 → '⚠ 공연장 불일치' 탐지되면 okay (코드로 막아야 함)
+-- '공연장 불일치' 탐지되면 okay (코드로 막아야 함)
 SELECT
     ps.performance_seat_id,
     ps.performance_id,
