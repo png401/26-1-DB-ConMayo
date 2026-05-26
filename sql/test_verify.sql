@@ -1,6 +1,6 @@
 -- =============================================================
 --  ConMayo 검증 쿼리 (test_verify.sql)
---  실행 순서: schema.sql → data.sql → (이 파일)
+--  실행 순서: schema.sql → data.sql → test_verify.sql
 --  각 쿼리마다 기대 결과 명시
 -- =============================================================
 
@@ -13,12 +13,14 @@ USE conmayo;
 
 -- [정규화] venue 주소 변경 시 공연 전체에 반영되는지 확인 (갱신 이상 없음)
 -- 기대: 엔하이픈 공연 주소가 같이 바뀌면 정규화 정상
+-- 오케이
 UPDATE venue SET address = '서울특별시 송파구 테스트로 999' WHERE venue_id = 1;
 SELECT p.title, v.address FROM performance p JOIN venue v ON v.venue_id = p.venue_id;
 UPDATE venue SET address = '서울특별시 송파구 올림픽로 424' WHERE venue_id = 1;  -- 원복
 
 -- [정규화] 공연 없는 좌석에 평점만 덩그러니 생기는 삽입 이상 확인
 -- 기대: 빈 칸 (삽입 이상 없음)
+-- 오케이
 SELECT s.seat_id, AVG(r.seat_rating)
 FROM seat s
 LEFT JOIN performance_seat ps ON ps.seat_id = s.seat_id
@@ -29,12 +31,14 @@ GROUP BY s.seat_id;
 
 -- [정규화] review에서 booking JOIN 한 번으로 member_id 도달 가능한지 확인 (3NF)
 -- 기대: review_id마다 member_id 유일하게 조회됨
+-- 오케이
 SELECT r.review_id, b.member_id, b.booking_id
 FROM review r
 JOIN booking b ON b.booking_id = r.booking_id;
 
 -- [정규화] 정가(performance_seat.price)와 실결제(booking.payment) 분리 확인
 -- 기대: booking_id=14(HOLD)만 payment=NULL, 나머지는 정상값
+-- 오케이
 SELECT b.booking_id, b.booking_status, ps.price, b.payment
 FROM performance_seat ps
 JOIN booking b ON b.performance_seat_id = ps.performance_seat_id
@@ -47,6 +51,7 @@ ORDER BY b.booking_id;
 
 -- [핵심] 좌석별 평균 평점 조회
 -- 기대: booking_id=11(F2석) 5.0, booking_id=13(1A석) 4.0 순으로 조회
+-- 굿
 SELECT
     s.seat_id,
     s.section,
@@ -64,6 +69,7 @@ ORDER BY avg_rating DESC;
 
 -- [핵심] 공연별 예매 현황 집계
 -- 기대: 공연별 전체/BOOKED/CANCELED/HOLD 수 확인
+-- 확인됨
 SELECT
     p.title,
     COUNT(*)                             AS total,
@@ -77,6 +83,7 @@ GROUP BY p.performance_id, p.title;
 
 -- [핵심] 취소 내역 전체 조회
 -- 기대: booking_id=1, 12 두 건 조회 (data.sql 선행 데이터)
+-- 확인 완료
 SELECT
     c.booking_id,
     b.member_id,
@@ -95,7 +102,8 @@ ORDER BY c.canceled_at;
 -- =============================================================
 
 -- [버그] 공연 전 작성된 리뷰 탐지
--- 기대: booking_id=16 → '⚠ 공연 전 리뷰' 탐지 (코드로 막아야 함)
+-- 기대: booking_id=16 → '공연 전 리뷰' 탐지 (코드로 막아야 함)
+-- 코드로 막아주기
 SELECT
     r.review_id,
     r.booking_id,
@@ -108,7 +116,8 @@ JOIN performance_seat ps ON ps.performance_seat_id = b.performance_seat_id
 JOIN performance p        ON p.performance_id = ps.performance_id;
 
 -- [버그] CANCELED / HOLD 예매에 달린 리뷰 탐지
--- 기대: booking_id=12(CANCELED), 14(HOLD) → '⚠ 비정상 상태 리뷰' 탐지 (코드로 막아야 함)
+-- 기대: booking_id=12(CANCELED), 14(HOLD) → '비정상 상태 리뷰' 탐지 (코드로 막아야 함)
+-- 코드로 막아주기
 SELECT
     r.review_id,
     b.booking_id,
@@ -133,6 +142,7 @@ JOIN seat s        ON s.seat_id = ps.seat_id;
 -- [버그] CANCELED인데 cancellation 레코드 없는 경우 탐지
 -- 기대: 빈 칸 (booking_id=1,12 모두 cancellation 있으므로)
 -- (test_edge.sql에서 cancellation 없이 booking만 CANCELED 처리 시 탐지됨)
+-- 빈 칸 나옴
 SELECT b.booking_id, b.booking_status
 FROM booking b
 LEFT JOIN cancellation c ON c.booking_id = b.booking_id
@@ -141,6 +151,7 @@ WHERE b.booking_status = 'CANCELED'
 
 -- [버그] 중복 리뷰 탐지
 -- 기대: 빈 칸 (UNIQUE 제약으로 막혀 있어야 함)
+-- 빈 칸 나옴
 SELECT booking_id, COUNT(*) AS cnt
 FROM review
 GROUP BY booking_id
@@ -148,6 +159,7 @@ HAVING cnt > 1;
 
 -- [버그] BOOKED인데 payment != price 탐지
 -- 기대: 빈 칸 (정상이면 price=payment)
+-- 빈칸 나옴
 SELECT b.booking_id, ps.price, b.payment, (b.payment - ps.price) AS diff
 FROM booking b
 JOIN performance_seat ps ON ps.performance_seat_id = b.performance_seat_id
