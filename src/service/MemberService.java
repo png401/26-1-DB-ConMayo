@@ -14,5 +14,4 @@ public class MemberService {
     public List<MemberDTO> detectHighCancelRateMembers() { return null; }             // 상습 취소자 탐지 (10건↑, 70%↑)
     public List<MemberDTO> getCurrentBlacklist() { return null; }                     // 현재 블랙리스트 목록 조회
     public void addToBlacklist(String memberId) {}                                    // 블랙리스트 등록 (30일)
-    public void removeFromBlacklist(String memberId) {}                               // 블랙리스트 해제
 }
