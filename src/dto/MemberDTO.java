@@ -1,19 +1,19 @@
-package model;
+package dto;
 
 import java.time.LocalDateTime;
 
-public class Member {
+public class MemberDTO {
 	
-	private String memberId;
-	private String passwd;
-	private String memberName;
-	private String phone;
-	private LocalDateTime blacklistUntil;
-	private MemberRole memberRole;
+	private String memberId;	// 회원 ID (PK)
+	private String passwd;		// 비밀번호
+	private String memberName;	// 회원 이름
+	private String phone;		// 전화번호 (UNIQUE)
+	private LocalDateTime blacklistUntil;	// 블랙리스트 해제 일시 (NULL이면 정상)
+	private MemberRole memberRole;			// 권한 (USER / ADMIN)
 	
-	public Member() {}
+	public MemberDTO() {}
 
-	public Member(String memberId, String passwd, 
+	public MemberDTO(String memberId, String passwd, 
 			String memberName, String phone, 
 			LocalDateTime blacklistUntil,
 			MemberRole memberRole) {
@@ -72,5 +72,5 @@ public class Member {
 	public void setMemberRole(MemberRole memberRole) {
 		this.memberRole = memberRole;
 	}
-	
+
 }
