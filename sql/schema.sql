@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS member (
 	member_id VARCHAR(20) PRIMARY KEY,
 	passwd VARCHAR(20) NOT NULL,
 	member_name VARCHAR(20) NOT NULL,
-	phone VARCHAR(15) UNIQUE,
+	phone VARCHAR(15) NOT NULL UNIQUE,
 	blacklist_until DATETIME DEFAULT NULL,
 	member_role ENUM('USER', 'ADMIN') NOT NULL DEFAULT 'USER'
 	);
@@ -21,8 +21,9 @@ CREATE TABLE IF NOT EXISTS member (
 -- 공연장 테이블
 CREATE TABLE IF NOT EXISTS venue (
 	venue_id INT AUTO_INCREMENT PRIMARY KEY,
-	venue_name VARCHAR(100) NOT NULL UNIQUE,
-	address VARCHAR(255) NOT NULL
+	venue_name VARCHAR(100) NOT NULL,
+	address VARCHAR(255) NOT NULL,
+	CONSTRAINT venue_name_address UNIQUE (venue_name, address)
 	);
 
 
