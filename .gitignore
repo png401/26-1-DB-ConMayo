@@ -22,3 +22,6 @@ out/
 # 빌드 결과물
 build/
 target/
+
+# DB 연결 속성
+src/db/db.properties
