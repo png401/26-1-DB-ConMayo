@@ -10,7 +10,7 @@ USE conmayo;
 -- 회원 테이블
 CREATE TABLE IF NOT EXISTS member (
 	member_id VARCHAR(20) PRIMARY KEY,
-	passwd VARCHAR(20) NOT NULL,
+	passwd VARCHAR(100) NOT NULL,
 	member_name VARCHAR(20) NOT NULL,
 	phone VARCHAR(15) NOT NULL UNIQUE,
 	blacklist_until DATETIME DEFAULT NULL,
