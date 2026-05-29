@@ -51,7 +51,7 @@ public class Main {
 			Connection conn = DatabaseConnector.getConnection();
 
 			// ② DAOImpl 생성 — conn 주입
-			// 인터페이스 타입으로 선언 → Service는 구현체를 모름 (유형 4 핵심)
+			// 인터페이스 타입으로 선언 -> Service는 구현체를 모름
 			MemberDAO memberDAO                   = new MemberDAOImpl(conn);
 			VenueDAO venueDAO                     = new VenueDAOImpl(conn);
 			PerformanceDAO performanceDAO         = new PerformanceDAOImpl(conn);
@@ -81,12 +81,12 @@ public class Main {
 			AdminView adminView             = new AdminView(); // 관리자 전용 뷰
 
 			// ⑤ Controller 생성 — Service + View 주입
-			// MemberController는 블랙리스트(관리자 기능)도 담당 → adminView도 주입
-			// PerformanceController는 공연 등록/수정/삭제(관리자) → adminView도 주입
+			// MemberController는 블랙리스트(관리자 기능)도 담당 -> adminView도 주입
+			// PerformanceController는 공연 등록/수정/삭제(관리자) -> adminView도 주입
 			MemberController memberController             = new MemberController(memberService, memberView, adminView);
 			PerformanceController performanceController   = new PerformanceController(performanceService, performanceView, adminView);
 			BookingController bookingController           = new BookingController(bookingService, bookingView);
-			SeatController seatController                 = new SeatController(seatService);
+			SeatController seatController                 = new SeatController(seatService, bookingController);
 			ReviewController reviewController             = new ReviewController(reviewService, reviewView);
 			VenueController venueController               = new VenueController(venueService, adminView);
 			PerformanceSeatController perfSeatController  = new PerformanceSeatController(perfSeatService, adminView);

@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 
 public class ReviewDTO {
     private int reviewId;    // 리뷰 ID (PK, AUTO_INCREMENT)
-    private int bookingId;   // 예매 ID (FK → booking, UNIQUE — 1예매 1리뷰)
+    private int bookingId;   // 예매 ID (FK -> booking, UNIQUE — 1예매 1리뷰)
     private int seatRating;  // 좌석 평점 (1~5, CHECK 제약)
     private LocalDateTime writtenAt; // 작성 시각 (DEFAULT CURRENT_TIMESTAMP)
     private String content;  // 리뷰 내용
@@ -58,6 +58,12 @@ public class ReviewDTO {
 
 	public void setContent(String content) {
 		this.content = content;
+	}
+
+	@Override
+	public String toString() {
+		return String.format("[리뷰%d] 예매:%d ★%d점 %s\n내용: %s",
+				reviewId, bookingId, seatRating, writtenAt, content);
 	}
     
 }
