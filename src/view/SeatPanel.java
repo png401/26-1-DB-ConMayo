@@ -11,18 +11,16 @@ import java.util.List;
 
 public class SeatPanel extends JDialog {
     private final SeatController seatController;
-    // TODO: BookingController 완성 후 주석 해제해야 함
-    // private final BookingController bookingController;
+    private final BookingController bookingController;
     private final List<SeatDTO> seats;
 
     private JLabel selectedInfoLabel;
     private SeatDTO selectedSeat;
 
-    public SeatPanel(List<SeatDTO> seats, int availableCount, SeatController seatController) {
+    public SeatPanel(List<SeatDTO> seats, int availableCount, SeatController seatController, BookingController bookingController) {
         this.seats = seats;
         this.seatController = seatController;
-        // TODO: BookingController 완성 후 파라미터 추가
-        // this.bookingController = bookingController;
+        this.bookingController = bookingController;
         initUI();
     }
 
@@ -85,7 +83,7 @@ public class SeatPanel extends JDialog {
         // section 기준으로 그룹핑
         Map<String, List<SeatDTO>> sectionMap = new LinkedHashMap<>();
         for (SeatDTO seat : seats) {
-            sectionMap.computeIfAbsent(seat.getsection(), k -> new ArrayList<>()).add(seat);
+            sectionMap.computeIfAbsent(seat.getSection(), k -> new ArrayList<>()).add(seat);
         }
 
         JPanel sectionsPanel = new JPanel(new GridLayout(1, sectionMap.size(), 10, 0));
@@ -163,7 +161,7 @@ public class SeatPanel extends JDialog {
                 return;
             }
             // TODO: BookingController 완성 후 주석 해제
-            // bookingController.startBooking(selectedSeat);
+            // bookingController.book(selectedSeat.getPerformanceSeatId());
             // dispose();
         });
 
@@ -177,7 +175,7 @@ public class SeatPanel extends JDialog {
     // 선택 좌석 정보 라벨 업데이트
     private void updateSelectedInfo(SeatDTO seat) {
         String info = String.format("선택 : %s구역 %d행 %d열  |  ★ %.1f점",
-                seat.getsection(), seat.getRowNum(), seat.getColNum(), seat.getAvgRating());
+                seat.getSection(), seat.getRowNum(), seat.getColNum(), seat.getAvgRating());
         selectedInfoLabel.setText(info);
     }
 
