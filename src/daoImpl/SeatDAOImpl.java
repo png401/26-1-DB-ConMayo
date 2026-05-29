@@ -23,6 +23,7 @@ public class SeatDAOImpl implements SeatDAO {
         String sql = """
                 SELECT s.seat_id,
                        s.venue_id,
+                       ps.performance_seat_id,
                        s.section,
                        s.row_num,
                        s.col_num,
@@ -37,7 +38,7 @@ public class SeatDAOImpl implements SeatDAO {
                 LEFT JOIN review r
                     ON r.booking_id = b.booking_id
                 WHERE ps.performance_id = ?
-                GROUP BY s.seat_id, s.venue_id, s.section, s.row_num, s.col_num, ps.price
+                GROUP BY s.seat_id, s.venue_id, ps.performance_seat_id, s.section, s.row_num, s.col_num, ps.price
                 ORDER BY s.section, s.row_num, s.col_num
                 """;
 
@@ -49,13 +50,14 @@ public class SeatDAOImpl implements SeatDAO {
                     SeatDTO seat = new SeatDTO(
                             rs.getInt("seat_id"),
                             rs.getInt("venue_id"),
+                            rs.getInt("performance_seat_id"),
                             rs.getString("section"),
                             rs.getInt("row_num"),
                             rs.getInt("col_num")
                     );
 
                     double avg = rs.getDouble("avg_rating");
-                    // AVG 결과가 NULL(리뷰 없는 좌석)이면 wasNull()이 true → 0.0 처리
+                    // AVG 결과가 NULL(리뷰 없는 좌석)이면 wasNull()이 true -> 0.0 처리
                     seat.setAvgRating(rs.wasNull() ? 0.0 : avg);
 
                     list.add(seat);
