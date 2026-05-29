@@ -6,9 +6,11 @@ import java.util.List;
 
 public class SeatController {
     private final SeatService seatService;
+    private final BookingController bookingController;
 
-    public SeatController(SeatService seatService) {
+    public SeatController(SeatService seatService, BookingController bookingController) {
         this.seatService = seatService;
+        this.bookingController = bookingController;
     }
     /*
     [오픈] 대기 순번 0이 되면 view에서 호출함
