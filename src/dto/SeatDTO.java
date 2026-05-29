@@ -3,7 +3,7 @@ package dto;
 public class SeatDTO {
 
 	private int seatId;       // 좌석 ID (PK, AUTO_INCREMENT)
-    private int venueId;      // 공연장 ID (FK → venue)
+    private int venueId;      // 공연장 ID (FK -> venue)
     private String section;   // 구역 (VIP / A / B)
     private int rowNum;       // 행 번호
     private int colNum;       // 열 번호
@@ -37,13 +37,11 @@ public class SeatDTO {
 		this.venueId = venueId;
 	}
 
-	public String getSection() {
+	public String getsection() {
 		return section;
 	}
 
-	public void setSection(String section) {
-		this.section = section;
-	}
+	public void setsection(String section) {this.section = section;}
 
 	public int getRowNum() {
 		return rowNum;
@@ -76,5 +74,12 @@ public class SeatDTO {
 	public void setColor(String color) {
 		this.color = color;
 	}
-	
+
+	//콘솔 출력 / 디버깅용.
+	//예: [좌석3] VIP 2행 5열 ★4.2 (GREEN)
+	@Override
+	public String toString() {
+		return String.format("[좌석%d] %s %d행 %d열 ★%.1f (%s)",
+				seatId, section, rowNum, colNum, avgRating, color);
+	}
 }
