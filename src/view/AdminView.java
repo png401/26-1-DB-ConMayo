@@ -2,6 +2,8 @@ package view;
 import dto.MemberDTO;
 import dto.PerformanceSeatDTO;
 import dto.VenueDTO;
+
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Scanner;
 public class AdminView {
@@ -23,8 +25,30 @@ public class AdminView {
     			선택 > 
     			""");
     	
-    	return sc.nextInt();
+    	int menu = sc.nextInt();
+        sc.nextLine();
+
+        return menu;
     	
+    }
+    
+ // 블랙리스트 메뉴
+    public int showMemberManageMenu() {
+
+        System.out.print("""
+                ====== 회원 관리 ======
+                1. 블랙리스트 조회
+                2. 블랙리스트 등록
+                3. 블랙리스트 해제
+                0. 뒤로가기
+
+                선택 >
+                """);
+
+        int menu = sc.nextInt();
+        sc.nextLine();
+
+        return menu;
     }
     
  // 공연장 목록 출력
@@ -72,7 +96,8 @@ public class AdminView {
     	System.out.println("회원ID\t\t제한 해제 시각\n");
     	
     	for (MemberDTO member : list) {
-    		System.out.println(member.getMemberId() + "\t\t" + member.getBlacklistUntil());
+    		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+    		System.out.println(member.getMemberId() + "\t\t" + member.getBlacklistUntil().format(formatter));
     	}
     	
 		System.out.println("");
@@ -88,7 +113,11 @@ public class AdminView {
  // 공연 ID 입력받기
     public int inputPerformanceId() { 
     	System.out.print("공연 ID > ");
-    	return sc.nextInt();
+
+    	int id = sc.nextInt();
+        sc.nextLine();
+
+        return id;
     }
     
  // 공연좌석-가격 목록 출력
@@ -114,7 +143,11 @@ public class AdminView {
  // 가격 입력받기
     public int inputPrice() { 
     	System.out.print("가격 > ");
-    	return sc.nextInt();
+
+    	int price = sc.nextInt();
+        sc.nextLine();
+
+        return price;
     } 
     
  // 에러 메시지 출력

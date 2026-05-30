@@ -1,11 +1,16 @@
 package daoImpl;
 
 import dao.MemberDAO;
+import db.DatabaseConnector;
 import dto.MemberDTO;
+import dto.MemberRole;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,55 +21,208 @@ public class MemberDAOImpl implements MemberDAO {
         this.conn = conn;
     }
 
+    
     @Override
     public MemberDTO findById(String memberId) {
-        // SELECT * FROM member WHERE member_id = ?
-        // → 로그인 시 ID/PW 검증, 블랙리스트 체크에 사용
-        return null; // TODO
+        // 로그인 시 ID/PW 검증, 블랙리스트 체크에 사용
+    	String sql = "SELECT * FROM member WHERE member_id = ?";
+    	
+    	try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+    		
+    		stmt.setString(1, memberId);
+    		
+    		ResultSet rs = stmt.executeQuery();
+    		
+    		// 조회 결과가 존재하면
+            if (rs.next()) {
+
+                MemberDTO member = new MemberDTO();
+
+                member.setMemberId(rs.getString("member_id"));
+                member.setPasswd(rs.getString("passwd"));
+                member.setMemberName(rs.getString("member_name"));
+                member.setPhone(rs.getString("phone"));
+                member.setMemberRole(MemberRole.valueOf(rs.getString("member_role")));
+                
+                Timestamp ts = rs.getTimestamp("blacklist_until");
+
+                if(ts != null){
+                    member.setBlacklistUntil(ts.toLocalDateTime());
+                }
+
+                return member;
+            }
+    	    
+    	} catch (SQLException e) {
+    		e.printStackTrace();
+    	}
+    	
+		return null;
+		
+    }
+    
+    
+    @Override
+    public MemberDTO login(String memberId, String passwd) {
+
+        String sql = "SELECT * FROM member " +
+            "WHERE member_id = ? AND passwd = SHA2(?, 256)";
+
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, memberId);
+            stmt.setString(2, passwd);
+
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+
+                MemberDTO member = new MemberDTO();
+
+                member.setMemberId(rs.getString("member_id"));
+                member.setPasswd(rs.getString("passwd"));
+                member.setMemberName(rs.getString("member_name"));
+                member.setPhone(rs.getString("phone"));
+                member.setMemberRole(MemberRole.valueOf(rs.getString("member_role")));
+
+                Timestamp ts = rs.getTimestamp("blacklist_until");
+
+                if (ts != null) {
+                    member.setBlacklistUntil(ts.toLocalDateTime());
+                }
+
+                return member;
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return null;
     }
 
+    
     @Override
     public void insert(MemberDTO member) {
-        // INSERT INTO member (member_id, passwd, member_name, phone, member_role)
-        // → 회원가입 시 호출
-    } // TODO
+    	// 회원가입 시 호출
+    	String sql = "INSERT INTO member " +
+    	        "(member_id, passwd, member_name, phone, member_role) " +
+    	        "VALUES (?, SHA2(?, 256), ?, ?, ?)";
 
+    	try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+    		
+    		stmt.setString(1, member.getMemberId());
+    	    stmt.setString(2, member.getPasswd());
+    	    stmt.setString(3, member.getMemberName());
+    	    stmt.setString(4, member.getPhone());
+            stmt.setString(5, member.getMemberRole().name());
+
+    	    stmt.executeUpdate();
+    	    
+    	} catch (SQLException e) {
+    		e.printStackTrace();
+    	}
+    	
+    }
+
+    
     @Override
     public void update(MemberDTO member) {
-        // UPDATE member SET ... WHERE member_id = ?
-        // → 회원 정보 수정 시 호출
-    } // TODO
+        // 회원 정보 수정 시 호출
+    	
+    	String sql = "UPDATE member " +
+    	        "SET passwd = SHA2(?, 256), member_name = ?, phone = ? " +
+    	        "WHERE member_id = ?";
 
-    @Override
-    public List<MemberDTO> findFastBookers(int performanceId, int thresholdSeconds) {
-        // 예매 오픈 후 N초 이내에 BOOKED 완료한 회원 탐지
-        // TIMESTAMPDIFF(SECOND, p.booking_open, b.booked_at) <= thresholdSeconds
-        return new ArrayList<>(); // TODO
+    	try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+    		
+    		stmt.setString(1, member.getPasswd());
+            stmt.setString(2, member.getMemberName());
+            stmt.setString(3, member.getPhone());
+            stmt.setString(4, member.getMemberId());
+
+    	    stmt.executeUpdate();
+    	    
+    	} catch (SQLException e) {
+    		e.printStackTrace();
+    	}
+    	
     }
 
-    @Override
-    public List<MemberDTO> findHighCancelRateMembers(int minBookings, double cancelRate) {
-        // 총 예매 건수 >= minBookings AND 취소율 > cancelRate 인 회원 탐지
-        // 기준: 예매 10건 이상 + 취소율 70% 초과
-        return new ArrayList<>(); // TODO
-    }
-
+    
     @Override
     public List<MemberDTO> findCurrentBlacklist() {
-        // SELECT WHERE blacklist_until IS NOT NULL AND blacklist_until > NOW()
-        // → 현재 블랙리스트 상태인 회원만 조회
-        return new ArrayList<>(); // TODO
+        // 현재 블랙리스트 상태인 회원 조회
+    	
+    	String sql = "SELECT * FROM member " + 
+    	"WHERE blacklist_until IS NOT NULL AND blacklist_until > NOW()";
+
+    	List<MemberDTO> list = new ArrayList<>();
+    	
+    	try (PreparedStatement stmt = conn.prepareStatement(sql);
+    			ResultSet rs = stmt.executeQuery()) {
+    		
+    		while (rs.next()) {
+                MemberDTO member = new MemberDTO();
+
+                member.setMemberId(rs.getString("member_id"));
+                member.setPasswd(rs.getString("passwd"));
+                member.setMemberName(rs.getString("member_name"));
+                member.setPhone(rs.getString("phone"));
+                member.setMemberRole(MemberRole.valueOf(rs.getString("member_role")));
+
+                Timestamp ts = rs.getTimestamp("blacklist_until");
+                if (ts != null) {
+                    member.setBlacklistUntil(ts.toLocalDateTime());
+                }
+
+                list.add(member);
+            }
+   	        
+    	} catch (SQLException e) {
+    		e.printStackTrace();
+   	    }
+
+    	return list;
     }
 
+    
     @Override
-    public void setBlacklist(String memberId, String blacklistUntil) {
-        // UPDATE member SET blacklist_until = ? WHERE member_id = ?
-        // → 블랙리스트 등록 (해제 일시 설정)
-    } // TODO
+    public void setBlacklist(String memberId, LocalDateTime blacklistUntil) {
+        // 블랙리스트 등록
+    	
+    	String sql = "UPDATE member SET blacklist_until = ? WHERE member_id = ?";
+    	
+    	try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+    	        
+    		stmt.setObject(1, blacklistUntil);
+    	    stmt.setString(2, memberId);
+    	        
+    	    stmt.executeUpdate();
+    	        
+    	} catch (SQLException e) {
+    	    e.printStackTrace();
+    	}
+    	
+    } 
 
+    
     @Override
     public void releaseBlacklist(String memberId) {
-        // UPDATE member SET blacklist_until = NULL WHERE member_id = ?
-        // → 블랙리스트 해제
-    } // TODO
+        // 블랙리스트 해제
+    	
+    	String sql = "UPDATE member SET blacklist_until = NULL WHERE member_id = ?";
+        
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setString(1, memberId);
+            
+            stmt.executeUpdate();
+            
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        
+    } 
+    
 }
