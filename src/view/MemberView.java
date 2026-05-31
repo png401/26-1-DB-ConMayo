@@ -13,8 +13,7 @@ public class MemberView {
     			2. 회원가입
     			0. 종료
     			
-    			선택 > 
-    			""");
+    			선택 > """);
     	
     	int menu = sc.nextInt();
     	sc.nextLine();
@@ -29,8 +28,7 @@ public class MemberView {
                 1. 공연 조회
     			2. 내 예매 조회
     			0. 로그아웃 
-                선택 >
-                """);
+                선택 > """);
 
         int menu = sc.nextInt();
         sc.nextLine();

@@ -22,8 +22,7 @@ public class AdminView {
     			5. 좌석 가격 설정
     			6. 블랙리스트 관리
     			
-    			선택 > 
-    			""");
+    			선택 > """);
     	
     	int menu = sc.nextInt();
         sc.nextLine();
@@ -42,8 +41,7 @@ public class AdminView {
                 3. 블랙리스트 해제
                 0. 뒤로가기
 
-                선택 >
-                """);
+                선택 > """);
 
         int menu = sc.nextInt();
         sc.nextLine();
@@ -159,5 +157,21 @@ public class AdminView {
     public void printSuccess(String msg) {
     	System.out.println("\n✓ " + msg + '\n');
     }
+
+	public int showVenueManageMenu() {
+		System.out.print("""
+                ====== 회원 관리 ======
+                1. 공연장 추가
+                2. 공연장 수정
+                3. 공연장 삭제
+                0. 뒤로가기
+
+                선택 > """);
+
+        int menu = sc.nextInt();
+        sc.nextLine();
+
+        return menu;
+	}
    
 }
