@@ -77,7 +77,8 @@ CREATE TABLE IF NOT EXISTS booking (
 		) NOT NULL DEFAULT 'HOLD',
 	booked_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	payment INT,
-	FOREIGN KEY(member_id) REFERENCES member(member_id),
+	FOREIGN KEY (member_id) REFERENCES member(member_id) 
+		ON DELETE CASCADE -- 해당 회원 삭제되면 예매도 삭제되도록 
 	FOREIGN KEY(performance_seat_id) REFERENCES performance_seat(performance_seat_id)
 	);
 	
@@ -106,3 +107,17 @@ CREATE TABLE IF NOT EXISTS cancellation (
 		) NOT NULL DEFAULT 'REQUESTED',
 	FOREIGN KEY(booking_id) REFERENCES booking(booking_id)
 	);
+	
+	
+-- 인덱스
+
+CREATE INDEX idx_performance_category
+	ON performance(category);
+	
+
+CREATE INDEX idx_booking_member
+	ON booking(member_id);
+	
+	
+CREATE INDEX idx_booked_at
+	ON booking(booked_at DESC);
