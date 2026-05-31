@@ -7,6 +7,7 @@ import service.BookingService;
 import service.CancellationService;
 import view.BookingView;
 import view.CancellationView;
+import controller.ReviewController;
 
 import java.util.List;
 
@@ -18,11 +19,12 @@ public class BookingController {
         this.bookingService = bookingService;
         this.bookingView = bookingView;
     }
-
+    
+    /*
     public void book(int performanceSeatId) {
         // SeatPanel(Swing)에서 memberId와 payment를 함께 넘겨줄 때 사용
         // 실제 호출은 아래 오버로드 메서드로
-    }
+    }*/
 
     public void book(String memberId, int performanceSeatId, int payment) {
         BookingDTO booking = new BookingDTO();
@@ -38,7 +40,7 @@ public class BookingController {
         }
     }
 
-    public void showMyBookings(String memberId) {
+    public void showMyBookings(String memberId, ReviewController reviewController) {//파라미터 추가 
         List<BookingDTO> list = bookingService.getMyBookings(memberId);
         bookingView.printMyBookings(list);
 
@@ -52,7 +54,7 @@ public class BookingController {
 
         switch (action) {
             case 1 -> handleCancel(selected);
-            case 2 -> System.out.println("[리뷰 작성] ReviewController로 위임");
+            case 2 -> reviewController.writeReview(selected.getBookingId()); // 수정
             case 0 -> { }
             default -> bookingView.printError("올바른 번호를 입력해주세요.");
         }

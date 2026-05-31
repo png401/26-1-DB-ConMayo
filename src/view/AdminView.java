@@ -74,6 +74,14 @@ public class AdminView {
     	System.out.print("공연장 이름 > ");
     	return sc.nextLine();
     }
+
+//공연장 아이디 입력받기 
+    public int inputVenueId() {
+        System.out.print("공연장 ID > ");
+        int id = sc.nextInt();
+        sc.nextLine();
+        return id;
+    }
     
  // 공연장 주소 입력받기
     public String inputVenueAddress() { 

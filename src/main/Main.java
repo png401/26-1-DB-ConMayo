@@ -40,6 +40,7 @@ import view.MemberView;
 import view.PerformanceView;
 import view.BookingView;
 import view.ReviewView;
+import view.SeatView;
 import view.AdminView;
 
 import java.sql.Connection;
@@ -87,12 +88,15 @@ public class Main {
 			PerformanceController performanceController   = new PerformanceController(performanceService, performanceView, adminView);
 			BookingController bookingController           = new BookingController(bookingService, bookingView);
 			SeatController seatController                 = new SeatController(seatService, bookingController);
+			SeatView seatView = new SeatView(seatController, bookingController);
 			ReviewController reviewController             = new ReviewController(reviewService, reviewView);
 			VenueController venueController               = new VenueController(venueService, adminView);
 			PerformanceSeatController perfSeatController  = new PerformanceSeatController(perfSeatService, adminView);
 			MemberController memberController             = new MemberController(memberService, memberView, adminView, 
-					performanceController, bookingController, perfSeatController, venueController);
-
+																performanceController, bookingController, perfSeatController, venueController, seatController, seatView);
+			memberController.setReviewController(reviewController); //추가
+			
+			
 			// ⑥ 프로그램 시작 — 로그인 화면부터 시작
 			// 로그인 후 USER면 일반 메뉴, ADMIN이면 관리자 메뉴로 분기
 			memberController.start();

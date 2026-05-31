@@ -103,6 +103,7 @@ System.out.println("\n=== 공연 등록 ==================");
         
         System.out.print("러닝타임(분) > ");
         int runningTime = sc.nextInt();
+        sc.nextLine();//이것만 추가
         
         LocalDateTime bookingOpen = null;
         while (bookingOpen == null) {
