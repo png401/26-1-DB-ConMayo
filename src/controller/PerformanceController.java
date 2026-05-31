@@ -8,8 +8,8 @@ import view.AdminView;
 import view.PerformanceView;
 
 public class PerformanceController {
-    private final PerformanceService performanceService;  // 클래스명은 그대로
-    private final PerformanceView performanceView;        // 클래스명은 그대로
+    private final PerformanceService performanceService;  
+    private final PerformanceView performanceView;        
     private final AdminView adminView;
 
     public PerformanceController(PerformanceService performanceService,
@@ -20,11 +20,13 @@ public class PerformanceController {
         this.adminView = adminView;
     }
 
-    // 1. 공연 목록 출력 (유저 화면 혹은 관리자 화면에 리스트 전달)
+    // 1. 공연 목록 출력 
     public void showList() {
     	List<PerformanceDTO> list = performanceService.getAllPerformances();
-        // 콘솔 기반 뷰의 사정에 따라 유연하게 매핑하도록 보완
-        if (adminView != null) {
+    	
+    	if (performanceView != null) {
+            performanceView.printList(list);
+        } else if (adminView != null) {
             System.out.println("--- 공연 목록 리스트 출력 ---");
             for (PerformanceDTO p : list) {
                 System.out.println("[" + p.getPerformanceId() + "] " + p.getTitle() + " (" + p.getSalesStatus() + ")");
@@ -39,14 +41,17 @@ public class PerformanceController {
             if (adminView != null) adminView.printError("해당 공연을 찾을 수 없습니다.");
             return;
         }
-        System.out.println("공연명: " + performance.getTitle());
+        
     }
-    
     // 3. 공연 등록 (관리자 화면에서 입력값 받아오기)
     public void add() {
     	if (adminView == null) return;
-        adminView.inputPerformanceId(); 
-        adminView.printSuccess("공연 등록 성공");
+    	PerformanceDTO newPerformance = performanceView.inputPerformanceInfo();
+    	performanceService.addPerformance(newPerformance);
+    	if (adminView != null) {
+            adminView.printSuccess("공연 등록 성공");
+        }
+    	
         showList();
     }
     
