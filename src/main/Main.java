@@ -1,3 +1,4 @@
+package main;
 // Main.java
 import db.DatabaseConnector;
 
@@ -83,10 +84,10 @@ public class Main {
 			// ⑤ Controller 생성 — Service + View 주입
 			// MemberController는 블랙리스트(관리자 기능)도 담당 -> adminView도 주입
 			// PerformanceController는 공연 등록/수정/삭제(관리자) -> adminView도 주입
-			MemberController memberController             = new MemberController(memberService, memberView, adminView);
 			PerformanceController performanceController   = new PerformanceController(performanceService, performanceView, adminView);
 			BookingController bookingController           = new BookingController(bookingService, bookingView);
 			SeatController seatController                 = new SeatController(seatService, bookingController);
+			MemberController memberController             = new MemberController(memberService, memberView, adminView, performanceController, bookingController);
 			ReviewController reviewController             = new ReviewController(reviewService, reviewView);
 			VenueController venueController               = new VenueController(venueService, adminView);
 			PerformanceSeatController perfSeatController  = new PerformanceSeatController(perfSeatService, adminView);

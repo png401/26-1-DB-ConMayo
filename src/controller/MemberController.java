@@ -35,7 +35,7 @@ public class MemberController {
 
         while (true) {
 
-            int menu = memberView.showUserMenu();
+            int menu = memberView.showMenu();
 
             switch (menu) {
 
