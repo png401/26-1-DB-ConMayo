@@ -41,7 +41,7 @@ public class MemberController {
 
         while (true) {
 
-            int menu = memberView.showMenu();
+            int menu = memberView.showUserMenu();
 
             switch (menu) {
 
@@ -190,7 +190,7 @@ public class MemberController {
 
                     if (loginMember.getMemberRole() == MemberRole.ADMIN) {
                         runAdminMenu();
-                    } else {
+                    } else { //로그인 성공
                         runUserMenu(loginMember);
                     }
 
