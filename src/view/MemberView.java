@@ -17,8 +17,25 @@ public class MemberView {
     			""");
     	
     	int menu = sc.nextInt();
+    	sc.nextLine();
+    	
     	return menu;
     	
+    }
+    
+    public int showUserMenu() {
+    	System.out.print("""
+                ====== 회원 메뉴 ======
+                1. 공연 조회
+    			2. 내 예매 조회
+    			0. 로그아웃 
+                선택 >
+                """);
+
+        int menu = sc.nextInt();
+        sc.nextLine();
+
+        return menu;
     }
     
  // 아이디 입력받기
@@ -37,12 +54,6 @@ public class MemberView {
     public MemberDTO inputMemberInfo() {
     	
     	MemberDTO member = new MemberDTO();
-
-        System.out.print("아이디 > ");
-        member.setMemberId(sc.nextLine());
-
-        System.out.print("비밀번호 > ");
-        member.setPasswd(sc.nextLine());
 
         System.out.print("이름 > ");
         member.setMemberName(sc.nextLine());
