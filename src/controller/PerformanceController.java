@@ -4,6 +4,7 @@ import java.util.List;
 
 import dto.PerformanceDTO;
 import service.PerformanceService;
+import dto.PerformanceSeatDTO;
 import view.AdminView;
 import view.PerformanceView;
 
@@ -58,6 +59,31 @@ public class PerformanceController {
     // 4. 공연 수정 (관리자)
     public void modify() {
     	if (adminView == null) return;
+    	System.out.println("\n=== 공연 정보 수정 ===");
+    	int performanceId = adminView.inputPerformanceId();
+    	
+    	// 기존 공연 정보 먼저 불러옴
+    	PerformanceDTO existingPerf = performanceService.getPerformance(performanceId);
+        if (existingPerf == null) {
+            adminView.printError("수정하려는 공연이 존재하지 않습니다.");
+            return;
+        }
+        
+        System.out.println("\n[현재 등록된 공연 정보]");
+        System.out.println("- 제목 : " + existingPerf.getTitle());
+        System.out.println("- 카테고리: " + existingPerf.getCategory());
+        if (existingPerf.getStartTime() != null) {
+            System.out.println("- 일시 : " + existingPerf.getStartTime().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
+        }
+        System.out.println("- 장소 : " + (existingPerf.getVenueName() != null ? existingPerf.getVenueName() : "장소ID " + existingPerf.getVenueId()));
+        System.out.println("- 판매상태: " + existingPerf.getSalesStatus());
+        System.out.println("=================================");
+    	
+    	System.out.println("\n--- 새로운 공연 정보를 입력하세요 ---");
+    	PerformanceDTO updatedPerformance = performanceView.inputPerformanceInfo();        updatedPerformance.setPerformanceId(performanceId);
+    	updatedPerformance.setPerformanceId(performanceId);
+    	performanceService.modifyPerformance(updatedPerformance);
+    	
         adminView.printSuccess("공연 수정 성공");
         showList();
     }
