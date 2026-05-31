@@ -104,4 +104,25 @@ public class BookingDAOImpl implements BookingDAO {
         dto.setPayment(rs.getInt("payment"));
         return dto;
     }
+
+    @Override
+    public LocalDateTime getPerformanceStartTime(int bookingId) {
+        String sql = "SELECT p.start_time " +
+                    "FROM booking b " +
+                    "JOIN performance_seat ps ON b.performance_seat_id = ps.performance_seat_id " +
+                    "JOIN performance p ON ps.performance_id = p.performance_id " +
+                    "WHERE b.booking_id = ?";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, bookingId);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    Timestamp ts = rs.getTimestamp("start_time");
+                    return ts != null ? ts.toLocalDateTime() : null;
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("공연 시작 시간 조회 실패: " + e.getMessage(), e);
+        }
+        return null;
+    }    
 }
