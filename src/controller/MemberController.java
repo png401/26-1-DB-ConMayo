@@ -15,6 +15,8 @@ public class MemberController {
     private final AdminView adminView;
 	private final PerformanceController performanceController;
 	private final BookingController bookingController;
+	private final PerformanceSeatController performanceSeatController;
+	private final VenueController venueController;
 	
     
     public MemberController(
@@ -22,13 +24,17 @@ public class MemberController {
             MemberView memberView,
             AdminView adminView,
             PerformanceController performanceController,
-            BookingController bookingController) {
+            BookingController bookingController,
+            PerformanceSeatController performanceSeatController,
+            VenueController venueController) {
 
         this.memberService = memberService;
         this.memberView = memberView;
         this.adminView = adminView;
         this.performanceController = performanceController;
         this.bookingController = bookingController;
+        this.performanceSeatController = performanceSeatController;
+        this.venueController = venueController;
     }
     
     private void runUserMenu(MemberDTO loginMember) {
@@ -83,15 +89,46 @@ public class MemberController {
 
                 case 4:
                     // 공연장 관리 
-                	
+                	runVenueManageMenu();
                     break;
 
                 case 5:
                     // 좌석 가격 설정
+                	performanceSeatController.modifyPrice();
                     break;
 
                 case 6:
                     runMemberManageMenu();
+                    break;
+
+                case 0:
+                    return;
+
+                default:
+                    adminView.printError("잘못된 메뉴입니다.");
+            }
+        }
+    }
+    
+    
+    private void runVenueManageMenu() {
+
+        while (true) {
+
+            int menu = adminView.showVenueManageMenu();
+
+            switch (menu) {
+
+                case 1:
+                	venueController.add();
+                    break;
+
+                case 2:
+                	venueController.modify();
+                    break;
+
+                case 3:
+                	venueController.remove();
                     break;
 
                 case 0:
@@ -205,8 +242,7 @@ public class MemberController {
  // 회원가입 처리
     public void register() {
     	
-    	String memberId =
-                memberView.inputId();
+    	String memberId = memberView.inputId();
 
         try {
 			if (memberService.isDuplicatedId(memberId)) {
@@ -216,9 +252,11 @@ public class MemberController {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
+        
+        String passwd = memberView.inputPassword();
     	
     	MemberDTO member = memberView.inputMemberInfo();
-    	memberService.register(member);
+    	memberService.register(memberId, passwd, member);
     	memberView.printSuccess("회원가입이 완료되었습니다.");
     	
     }

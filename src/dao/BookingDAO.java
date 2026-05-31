@@ -1,6 +1,8 @@
 // BookingDAO.java
 package dao;
 import dto.BookingDTO;
+
+import java.time.LocalDateTime;
 import java.util.List;
 public interface BookingDAO {
     void insert(BookingDTO booking);                              // 예매 INSERT (HOLD 상태로 시작)

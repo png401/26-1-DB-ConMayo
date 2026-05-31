@@ -21,9 +21,11 @@ public class MemberService {
     }
     
     
-    public void register(MemberDTO member) {
+    public void register(String id, String pw, MemberDTO member) {
     	// 회원가입
     	member.setMemberRole(MemberRole.USER);
+    	member.setMemberId(id);
+    	member.setPasswd(pw);
     	memberDAO.insert(member);
     }
     
