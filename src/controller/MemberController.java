@@ -3,6 +3,7 @@ import service.MemberService;
 import view.AdminView;
 import view.MemberView;
 
+import java.sql.SQLException;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
@@ -203,6 +204,18 @@ public class MemberController {
     
  // 회원가입 처리
     public void register() {
+    	
+    	String memberId =
+                memberView.inputId();
+
+        try {
+			if (memberService.isDuplicatedId(memberId)) {
+				memberView.printError("중복된 아이디입니다.");
+			    return;
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
     	
     	MemberDTO member = memberView.inputMemberInfo();
     	memberService.register(member);

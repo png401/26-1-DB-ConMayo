@@ -55,12 +55,6 @@ public class MemberView {
     	
     	MemberDTO member = new MemberDTO();
 
-        System.out.print("아이디 > ");
-        member.setMemberId(sc.nextLine());
-
-        System.out.print("비밀번호 > ");
-        member.setPasswd(sc.nextLine());
-
         System.out.print("이름 > ");
         member.setMemberName(sc.nextLine());
 

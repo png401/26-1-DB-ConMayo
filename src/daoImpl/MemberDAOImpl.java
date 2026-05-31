@@ -1,7 +1,6 @@
 package daoImpl;
 
 import dao.MemberDAO;
-import db.DatabaseConnector;
 import dto.MemberDTO;
 import dto.MemberRole;
 
@@ -59,6 +58,26 @@ public class MemberDAOImpl implements MemberDAO {
     	
 		return null;
 		
+    }
+    
+    
+    @Override
+    public boolean existsById(String memberId) throws SQLException {
+
+        String sql = "SELECT COUNT(*)  FROM member WHERE member_id = ?";
+
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, memberId);
+
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                return rs.getInt(1) > 0;
+            }
+
+            return false;
+        }
     }
     
     

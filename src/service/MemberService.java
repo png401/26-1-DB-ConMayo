@@ -3,6 +3,7 @@ import dao.MemberDAO;
 import dto.MemberDTO;
 import dto.MemberRole;
 
+import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.List;
 public class MemberService {
@@ -24,6 +25,12 @@ public class MemberService {
     	// 회원가입
     	member.setMemberRole(MemberRole.USER);
     	memberDAO.insert(member);
+    }
+    
+    public boolean isDuplicatedId(String memberId) throws SQLException {
+    	// 회원가입 시 아이디 중복 확인 
+    	
+    	return memberDAO.existsById(memberId);
     }
     
     
