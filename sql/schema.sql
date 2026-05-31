@@ -78,7 +78,7 @@ CREATE TABLE IF NOT EXISTS booking (
 	booked_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	payment INT,
 	FOREIGN KEY (member_id) REFERENCES member(member_id) 
-		ON DELETE CASCADE -- 해당 회원 삭제되면 예매도 삭제되도록 
+		ON DELETE CASCADE, -- 해당 회원 삭제되면 예매도 삭제되도록 
 	FOREIGN KEY(performance_seat_id) REFERENCES performance_seat(performance_seat_id)
 	);
 	
