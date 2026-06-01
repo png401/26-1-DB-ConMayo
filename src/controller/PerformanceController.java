@@ -70,6 +70,12 @@ public class PerformanceController {
         int action = performanceView.inputPerformanceId();
 
         if (action == 1) {
+        	if (performance.getSalesStatus() != dto.SalesStatus.OPEN) {
+                System.out.println("\n❌ 예매가 불가능한 공연입니다. (" + performance.getSalesStatus() + ")");
+                System.out.println("판매 상태가 'OPEN'인 공연만 예매할 수 있습니다.");
+                return 0; // 0을 리턴하여 SeatPanel로 가지 않고 이전 회원 메뉴로 돌아가게 만듦
+            }
+        	
             return performanceId;
         }
 
