@@ -34,7 +34,14 @@ public class PerformanceSeatController {
     // 3. 좌석 가격 수정
     public void modifyPrice() {
     	if (adminView == null) return;
-        int perfSeatId = 1; 
+
+    	int perfSeatId = adminView.inputPerformanceSeatId(); 
+
+        if (perfSeatId <= 0) {
+            adminView.printError("잘못된 공연좌석 번호입니다.");
+            return;
+        }
+    	
         int newPrice = adminView.inputPrice();
 
         performanceSeatService.modifyPrice(perfSeatId, newPrice);
