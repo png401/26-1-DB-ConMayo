@@ -33,7 +33,7 @@ public class AdminView {
  // 블랙리스트 메뉴
     public int showMemberManageMenu() {
 
-    	System.out.println("\n====== 회원 관리 ======");
+    	System.out.println("\n====== 블랙리스트 관리 ======");
     	System.out.println("1. 블랙리스트 조회");
     	System.out.println("2. 블랙리스트 등록");
     	System.out.println("3. 블랙리스트 해제");
