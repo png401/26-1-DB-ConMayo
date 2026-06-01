@@ -31,7 +31,8 @@ public class PerformanceView {
         	System.out.printf("[%d] %s\n", p.getPerformanceId(), p.getTitle());          
             
             String formattedDate = (p.getStartTime() != null) ? p.getStartTime().format(listDateFormatter) : "날짜미정";
-            System.out.printf("%s | 공연장 ID: %d\n", formattedDate, p.getVenueId());
+            String venueName = (p.getVenueName() != null) ? p.getVenueName() : "장소미정";
+            System.out.printf("%s | %s\n", formattedDate, venueName);
             System.out.printf("잔여석 %d | %s\n", p.getRemainingSeats(), p.getSalesStatus()); 
             System.out.println();
         }
@@ -45,20 +46,22 @@ public class PerformanceView {
         }
         String formattedStartTime = (performance.getStartTime() != null) ? performance.getStartTime().format(formatter) : "미정";
         
+        int totalSeats = (seatList != null) ? seatList.size() : 0;
+        
         System.out.println("\n=== 공연 상세 ==================");
         System.out.println("제목 : " + performance.getTitle());
         System.out.println("카테고리: " + performance.getCategory());
         System.out.println("일시 : " + formattedStartTime);
-        System.out.println("장소 : 공연장 ID " + performance.getVenueId());
+        System.out.println("장소 : " + performance.getVenueName());
         System.out.println("러닝타임: " + performance.getRunningTime() + "분");
-        System.out.printf("잔여석 : %d\n\n", performance.getRemainingSeats());
+        System.out.printf("잔여석 : %d / %d\n\n", performance.getRemainingSeats(), totalSeats);
         
         if (seatList == null || seatList.isEmpty()) {
             System.out.println("등록된 좌석 가격 정보가 없습니다.\n");
         } else {
             for (PerformanceSeatDTO seat : seatList) {
-                // 예: VIP 170,000원 형태로 출력 (등급 정보가 seatId나 별도 필드에 있다고 가정)
-                System.out.printf("좌석 등급(ID: %d) : %,d원\n", seat.getSeatId(), seat.getPrice());
+            	String gradeName = (seat.getSection() != null) ? seat.getSection() : "등급" + seat.getSeatId();
+            	System.out.printf("%s %,d원\n", gradeName, seat.getPrice());
             }
             System.out.println();
         }
@@ -82,7 +85,7 @@ public class PerformanceView {
     
     // 5. 공연 정보 입력받기
     public PerformanceDTO inputPerformanceInfo() {
-System.out.println("\n=== 공연 등록 ==================");
+    	System.out.println("\n=== 공연 등록 ==================");
         
         System.out.print("공연 제목 > ");
         String title = sc.nextLine();
@@ -103,6 +106,7 @@ System.out.println("\n=== 공연 등록 ==================");
         
         System.out.print("러닝타임(분) > ");
         int runningTime = sc.nextInt();
+        sc.nextLine();//이것만 추가
         
         LocalDateTime bookingOpen = null;
         while (bookingOpen == null) {

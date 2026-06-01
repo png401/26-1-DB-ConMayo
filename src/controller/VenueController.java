@@ -35,27 +35,23 @@ public class VenueController {
     
     // 3. 공연장 수정
     public void modify() {
-        if (adminView == null) return;
-        //	추후 AdminView에 선택 ID 기능 연동 혹은 주석 처리 가능
-
-        int venueId = 1;
+    	if (adminView == null) return;
+        showAll();
+        int venueId = adminView.inputVenueId(); // View에서 입력
         String name = adminView.inputVenueName();
         String address = adminView.inputVenueAddress();
-
         venueService.modifyVenue(venueId, name, address);
         adminView.printSuccess("공연장 정보가 수정되었습니다.");
-        showAll(); // 수정 후 목록 갱신
+        showAll();
     }
     
     // 4. 공연장 삭제
     public void remove() {
-        if (adminView == null) return;
-
-        int venueId = 1;
-        if (venueId <= 0) return;
-
+    	if (adminView == null) return;
+        showAll();
+        int venueId = adminView.inputVenueId(); // View에서 입력
         venueService.removeVenue(venueId);
         adminView.printSuccess("공연장이 삭제되었습니다.");
-        showAll(); // 삭제 후 목록 갱신
+        showAll();
     }
 }

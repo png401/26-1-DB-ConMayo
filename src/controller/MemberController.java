@@ -9,6 +9,10 @@ import java.util.List;
 
 import dto.MemberDTO;
 import dto.MemberRole;
+
+import view.SeatView;
+import dto.SeatDTO;
+
 public class MemberController {
     private final MemberService memberService;
     private final MemberView memberView;
@@ -17,6 +21,10 @@ public class MemberController {
 	private final BookingController bookingController;
 	private final PerformanceSeatController performanceSeatController;
 	private final VenueController venueController;
+	private final SeatController seatController;
+	private final SeatView seatView;
+	
+	private ReviewController reviewController;//추가
 	
     
     public MemberController(
@@ -26,7 +34,9 @@ public class MemberController {
             PerformanceController performanceController,
             BookingController bookingController,
             PerformanceSeatController performanceSeatController,
-            VenueController venueController) {
+            VenueController venueController,
+            SeatController seatController,
+            SeatView seatView) {
 
         this.memberService = memberService;
         this.memberView = memberView;
@@ -35,23 +45,35 @@ public class MemberController {
         this.bookingController = bookingController;
         this.performanceSeatController = performanceSeatController;
         this.venueController = venueController;
+        this.seatController = seatController;
+        this.seatView = seatView;
+    }
+    
+    public void setReviewController(ReviewController reviewController) {
+        this.reviewController = reviewController;
     }
     
     private void runUserMenu(MemberDTO loginMember) {
+    	seatController.setMemberId(loginMember.getMemberId());
 
         while (true) {
 
-            int menu = memberView.showMenu();
+            int menu = memberView.showUserMenu();
 
             switch (menu) {
 
                 case 1:
-                    performanceController.showList();
+                	int performanceId = performanceController.showList();
+                    if (performanceId != 0) {
+                        List<SeatDTO> seats = seatController.openSeatPanel(performanceId);
+                        int availableCount = seatController.getAvailableCount(performanceId);
+                        seatView.showSeatPanel(seats, availableCount, loginMember.getMemberId());
+                    }
                     break;
 
                 case 2:
                     bookingController.showMyBookings(
-                            loginMember.getMemberId());
+                            loginMember.getMemberId(), reviewController);//reviewController 추가 
                     break;
                     
 
@@ -190,7 +212,7 @@ public class MemberController {
 
                     if (loginMember.getMemberRole() == MemberRole.ADMIN) {
                         runAdminMenu();
-                    } else {
+                    } else { //로그인 성공
                         runUserMenu(loginMember);
                     }
 

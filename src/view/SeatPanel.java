@@ -13,21 +13,23 @@ public class SeatPanel extends JDialog {
     private final SeatController seatController;
     private final BookingController bookingController;
     private final List<SeatDTO> seats;
+    private final String memberId;
 
     private JLabel selectedInfoLabel;
     private SeatDTO selectedSeat;
 
-    public SeatPanel(List<SeatDTO> seats, int availableCount, SeatController seatController, BookingController bookingController) {
+    public SeatPanel(List<SeatDTO> seats, int availableCount, SeatController seatController, BookingController bookingController, String memberId) {
         this.seats = seats;
         this.seatController = seatController;
         this.bookingController = bookingController;
+        this.memberId = memberId;//추가
         initUI();
     }
 
     private void initUI() {
         setTitle("SeatPanel");
         setModal(true);
-        setSize(650, 700);
+        setSize(900, 800);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout(0, 10));
 
@@ -99,7 +101,7 @@ public class SeatPanel extends JDialog {
             sectionLabel.setFont(new Font("맑은 고딕", Font.BOLD, 14));
             sectionPanel.add(sectionLabel, BorderLayout.NORTH);
 
-            int maxRow = sectionSeats.stream().mapToInt(SeatDTO::getRowNum).max().orElse(1);
+            int maxRow = (int) sectionSeats.stream().mapToInt(SeatDTO::getRowNum).distinct().count();
             int maxCol = sectionSeats.stream().mapToInt(SeatDTO::getColNum).max().orElse(1);
 
             JPanel grid = new JPanel(new GridLayout(maxRow, maxCol, 4, 4));
@@ -113,8 +115,11 @@ public class SeatPanel extends JDialog {
             sectionPanel.add(grid, BorderLayout.CENTER);
             sectionsPanel.add(sectionPanel);
         }
-
-        area.add(sectionsPanel, BorderLayout.CENTER);
+        
+        JScrollPane scrollPane = new JScrollPane(sectionsPanel);
+        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        area.add(scrollPane, BorderLayout.CENTER);
         return area;
     }
 
@@ -124,16 +129,22 @@ public class SeatPanel extends JDialog {
                 + seat.getRowNum() + "<br>" + seat.getColNum()
                 + "</center></html>");
         btn.setPreferredSize(new Dimension(45, 45));
-        btn.setBackground(getColor(seat.getColor()));
         btn.setOpaque(true);
         btn.setBorderPainted(false);
         btn.setFont(new Font("맑은 고딕", Font.PLAIN, 10));
 
-        btn.addActionListener(e -> {
-            selectedSeat = seat;
-            updateSelectedInfo(seat);
-            seatController.onSeatSelected(seat);
-        });
+        if (seat.isBooked()) { // ← 추가
+            btn.setBackground(new Color(180, 180, 180));
+            btn.setEnabled(false); // 클릭 불가
+            btn.setToolTipText("이미 선택된 좌석입니다.");
+        } else {
+            btn.setBackground(getColor(seat.getColor()));
+            btn.addActionListener(e -> {
+                selectedSeat = seat;
+                updateSelectedInfo(seat);
+                seatController.onSeatSelected(seat);
+            });
+        }
 
         return btn;
     }
@@ -160,9 +171,9 @@ public class SeatPanel extends JDialog {
                 JOptionPane.showMessageDialog(this, "좌석을 먼저 선택해주세요.");
                 return;
             }
-            // TODO: BookingController 완성 후 주석 해제
-            // bookingController.book(selectedSeat.getPerformanceSeatId());
-            // dispose();
+
+            bookingController.book(memberId, selectedSeat.getPerformanceSeatId(), selectedSeat.getPrice());
+            dispose();
         });
 
         JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));

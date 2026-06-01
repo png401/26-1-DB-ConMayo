@@ -7,6 +7,7 @@ public class PerformanceDTO {
 
 	private int performanceId;	// 공연 ID (PK, AUTO_INCREMENT)
 	private int venueId;		// 공연장 ID (FK → venue)
+	private String venueName;   //공연장 이름
 	private String title;       // 공연 제목
     private String category;    // 카테고리 (콘서트/뮤지컬/스포츠 등)
 	private LocalDateTime startTime;	// 공연 시작 일시
@@ -112,5 +113,13 @@ public class PerformanceDTO {
     public void setSeatList(List<PerformanceSeatDTO> seatList) {
         this.seatList = seatList;
     }
+
+	public String getVenueName() {
+		return venueName;
+	}
+
+	public void setVenueName(String venueName) {
+		this.venueName = venueName;
+	}
 
 }

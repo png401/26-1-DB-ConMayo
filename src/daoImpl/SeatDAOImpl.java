@@ -28,6 +28,7 @@ public class SeatDAOImpl implements SeatDAO {
                        s.row_num,
                        s.col_num,
                        ps.price,
+                       b.booking_status,
                        AVG(r.seat_rating) AS avg_rating
                 FROM performance_seat ps
                 JOIN seat s
@@ -38,7 +39,7 @@ public class SeatDAOImpl implements SeatDAO {
                 LEFT JOIN review r
                     ON r.booking_id = b.booking_id
                 WHERE ps.performance_id = ?
-                GROUP BY s.seat_id, s.venue_id, ps.performance_seat_id, s.section, s.row_num, s.col_num, ps.price
+                GROUP BY s.seat_id, s.venue_id, ps.performance_seat_id, s.section, s.row_num, s.col_num, ps.price, b.booking_status
                 ORDER BY s.section, s.row_num, s.col_num
                 """;
 
@@ -59,6 +60,10 @@ public class SeatDAOImpl implements SeatDAO {
                     double avg = rs.getDouble("avg_rating");
                     // AVG 결과가 NULL(리뷰 없는 좌석)이면 wasNull()이 true -> 0.0 처리
                     seat.setAvgRating(rs.wasNull() ? 0.0 : avg);
+                    seat.setPrice(rs.getInt("price")); // 추가
+                    // booking LEFT JOIN에서 booking_status가 있으면 예매된 좌석
+                    String bookingStatus = rs.getString("booking_status"); // 추가
+                    seat.setBooked(bookingStatus != null); // 추가
 
                     list.add(seat);
                 }

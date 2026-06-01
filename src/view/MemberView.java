@@ -23,12 +23,13 @@ public class MemberView {
     }
     
     public int showUserMenu() {
-    	System.out.print("""
-                ====== 회원 메뉴 ======
-                1. 공연 조회
-    			2. 내 예매 조회
-    			0. 로그아웃 
-                선택 > """);
+        System.out.print("""
+    ====== 회원 메뉴 ======
+    1. 공연 조회
+    2. 내 예매 조회
+    0. 로그아웃
+
+    선택 > """);
 
         int menu = sc.nextInt();
         sc.nextLine();

@@ -10,6 +10,8 @@ public class SeatDTO {
 	private int colNum;             // 열 번호
 	private double avgRating;       // 평균 평점 (review에서 AVG 집계, 리뷰 없으면 0.0)
 	private String color;           // SeatPanel 색상 (RED/ORANGE/YELLOW/LIME/GREEN/GRAY)
+	private int price;//추가 
+	private boolean isBooked;
 
 	public SeatDTO() {}
 
@@ -46,6 +48,12 @@ public class SeatDTO {
 
 	public String getColor() { return color; }
 	public void setColor(String color) { this.color = color; }
+	
+	public int getPrice() { return price; }
+	public void setPrice(int price) { this.price = price; }
+	
+	public boolean isBooked() { return isBooked; }
+	public void setBooked(boolean isBooked) { this.isBooked = isBooked; }
 
 	@Override
 	public String toString() {
