@@ -57,7 +57,7 @@ public class PerformanceDAOImpl implements PerformanceDAO {
         String sql = BASE_SQL + """
                 GROUP BY p.performance_id, p.title, p.category, p.start_time, p.running_time,
                          p.sales_status, p.booking_open, p.venue_id, v.venue_name
-                ORDER BY p.start_time
+                ORDER BY p.performance_id
                 """;
 
         try (PreparedStatement pstmt = conn.prepareStatement(sql);
@@ -80,7 +80,7 @@ public class PerformanceDAOImpl implements PerformanceDAO {
                 WHERE p.category = ?
                 GROUP BY p.performance_id, p.title, p.category, p.start_time, p.running_time,
                          p.sales_status, p.booking_open, p.venue_id, v.venue_name
-                ORDER BY p.start_time
+                ORDER BY p.performance_id
                 """;
 
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
