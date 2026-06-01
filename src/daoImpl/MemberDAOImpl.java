@@ -227,7 +227,7 @@ public class MemberDAOImpl implements MemberDAO {
 
     
     @Override
-    public void releaseBlacklist(String memberId) {
+    public boolean releaseBlacklist(String memberId) {
         // 블랙리스트 해제
     	
     	String sql = "UPDATE member SET blacklist_until = NULL WHERE member_id = ?";
@@ -236,12 +236,15 @@ public class MemberDAOImpl implements MemberDAO {
             
             stmt.setString(1, memberId);
             
-            stmt.executeUpdate();
+            int result = stmt.executeUpdate();
+
+            return result > 0;
             
         } catch (SQLException e) {
             e.printStackTrace();
         }
         
+        return false;
     } 
     
 }

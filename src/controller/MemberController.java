@@ -312,7 +312,13 @@ public class MemberController {
     public void releaseBlacklist() {
     	
     	String memberId = adminView.inputMemberIdToBlacklist();
-    	memberService.releaseBlacklist(memberId);
-    	adminView.printSuccess("블랙리스트가 해제되었습니다.");
+
+        boolean success = memberService.releaseBlacklist(memberId);
+
+        if (success) {
+            adminView.printSuccess("블랙리스트가 해제되었습니다.");
+        } else {
+            adminView.printError("존재하지 않는 회원 ID입니다.");
+        }
     }
 }
