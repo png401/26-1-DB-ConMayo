@@ -55,7 +55,7 @@ public class MemberView {
         System.out.print("이름 > ");
         member.setMemberName(sc.nextLine());
 
-        System.out.print("전화번호 > ");
+        System.out.print("전화번호 (010-0000-0000) > ");
         member.setPhone(sc.nextLine());
 
         return member;
