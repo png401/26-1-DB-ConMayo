@@ -18,9 +18,7 @@ public class PerformanceView {
 
     // 1. 공연 목록 출력
     public void printList(List<PerformanceDTO> list) {
-    	System.out.println("\n=== 공연 목록 ==================");
-        System.out.println("카테고리 (전체/콘서트/뮤지컬/스포츠)");
-        System.out.println("선택 > 전체\n");
+    	System.out.println("\n====== 공연 목록 ======");
         
         if (list == null || list.isEmpty()) {
             System.out.println("등록된 공연이 없습니다.");
@@ -70,9 +68,20 @@ public class PerformanceView {
     }
     
     // 3. 카테고리 입력받기
-    public String inputCategory() { 
-        System.out.print("카테고리 (전체/콘서트/뮤지컬/스포츠) > ");
-        return sc.nextLine();
+    public int inputCategory() { 
+    	System.out.println("\n====== 카테고리 선택 ======");
+        System.out.println("1. 전체");
+        System.out.println("2. 콘서트");
+        System.out.println("3. 뮤지컬");
+        System.out.println("4. 스포츠");
+        System.out.println("0. 뒤로");
+        System.out.println();
+        System.out.print("선택 > ");
+
+        int choice = sc.nextInt();
+        sc.nextLine();
+
+        return choice;
     }
     
     // 4. 공연 ID 입력받기
