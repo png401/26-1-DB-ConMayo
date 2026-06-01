@@ -114,13 +114,15 @@ public class PerformanceDAOImpl implements PerformanceDAO {
 	                       rs.getInt("venue_id")
 	                       );
 	        	   performance.setVenueName(rs.getString("venue_name"));
+	        	   
+	        	   return performance;
 	           }
 	       }
 	   } catch (SQLException e) {
 		// TODO Auto-generated catch block
 		e.printStackTrace();
 	   }
-        return null; // TODO
+        return null;
     }
 
     @Override

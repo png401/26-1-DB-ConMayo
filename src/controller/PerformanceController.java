@@ -3,6 +3,7 @@ import java.util.List;
 import dto.PerformanceDTO;
 import service.PerformanceService;
 import view.AdminView;
+import view.MemberView;
 import view.PerformanceView;
 
 public class PerformanceController {
@@ -20,17 +21,53 @@ public class PerformanceController {
 
     // 1. 공연 목록 출력 (유저용 — 공연 선택 + 예매 흐름 포함, performanceId 반환)
     public int showList() {
-        List<PerformanceDTO> list = performanceService.getAllPerformances();
+    	int choice = performanceView.inputCategory();
+
+        List<PerformanceDTO> list;
+
+        switch (choice) {
+            case 1:
+                list = performanceService.getAllPerformances();
+                break;
+
+            case 2:
+                list = performanceService.getByCategory("콘서트");
+                break;
+
+            case 3:
+                list = performanceService.getByCategory("뮤지컬");
+                break;
+
+            case 4:
+                list = performanceService.getByCategory("스포츠");
+                break;
+
+            case 0:
+                return 0;
+
+            default:
+                adminView.printError("잘못된 입력입니다.");
+                return 0;
+        }
+
         performanceView.printList(list);
 
         int performanceId = performanceView.inputPerformanceId();
-        if (performanceId == 0) return 0;
 
-        PerformanceDTO performance = performanceService.getPerformance(performanceId);
+        if (performanceId == 0) {
+            return 0;
+        }
+
+        PerformanceDTO performance =
+                performanceService.getPerformance(performanceId);
+
         performanceView.printDetail(performance, null);
 
         int action = performanceView.inputPerformanceId();
-        if (action == 1) return performanceId;
+
+        if (action == 1) {
+            return performanceId;
+        }
 
         return 0;
     }
