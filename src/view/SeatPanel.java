@@ -134,8 +134,9 @@ public class SeatPanel extends JDialog {
         btn.setFont(new Font("맑은 고딕", Font.PLAIN, 10));
 
         if (seat.isBooked()) { // ← 추가
-            btn.setBackground(Color.LIGHT_GRAY);
+            btn.setBackground(new Color(180, 180, 180));
             btn.setEnabled(false); // 클릭 불가
+            btn.setToolTipText("이미 선택된 좌석입니다.");
         } else {
             btn.setBackground(getColor(seat.getColor()));
             btn.addActionListener(e -> {
