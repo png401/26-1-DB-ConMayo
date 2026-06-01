@@ -24,8 +24,10 @@ public class PerformanceDAOImpl implements PerformanceDAO {
         // SELECT * FROM performance ORDER BY start_time
         // → 공연 목록 화면에 전체 출력
     	List<PerformanceDTO> list = new ArrayList<>();
-        String sql = "SELECT performance_id, title, category, start_time, running_time, sales_status, booking_open, venue_id " +
-                     "FROM performance ORDER BY start_time";
+        String sql = "SELECT p.performance_id, p.title, p.category, p.start_time, p.running_time, "
+        		+ "p.sales_status, p.booking_open, p.venue_id, v.venue_name "
+                     + "FROM performance p JOIN venue v ON p.venue_id = v.venue_id "
+                     + "ORDER BY p.start_time";
 
         try (PreparedStatement pstmt = conn.prepareStatement(sql);
              ResultSet rs = pstmt.executeQuery()) {
@@ -41,6 +43,7 @@ public class PerformanceDAOImpl implements PerformanceDAO {
                     rs.getTimestamp("booking_open").toLocalDateTime(),
                     rs.getInt("venue_id")
                 );
+                performance.setVenueName(rs.getString("venue_name"));
                 list.add(performance);
             }
         } catch (SQLException e) {
@@ -55,8 +58,10 @@ public class PerformanceDAOImpl implements PerformanceDAO {
         // SELECT * FROM performance WHERE category = ?
         // → 카테고리 필터 조회 (콘서트/뮤지컬/스포츠)
     	List<PerformanceDTO> list = new ArrayList<>();
-        String sql = "SELECT performance_id, title, category, start_time, running_time, sales_status, booking_open, venue_id " +
-                     "FROM performance WHERE category = ? ORDER BY start_time";
+        String sql = "SELECT p.performance_id, p.title, p.category, p.start_time, p.running_time, "
+        		+ "p.sales_status, p.booking_open, p.venue_id, v.venue_name " +
+                     "FROM performance p JOIN venue v ON p.venue_id = v.venue_id "
+                     + "WHERE category = ? ORDER BY start_time";
 
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, category);
@@ -73,6 +78,7 @@ public class PerformanceDAOImpl implements PerformanceDAO {
                         rs.getTimestamp("booking_open").toLocalDateTime(),
                         rs.getInt("venue_id")
                     );
+                    performance.setVenueName(rs.getString("venue_name"));
                     list.add(performance);
                 }
             }
@@ -87,24 +93,27 @@ public class PerformanceDAOImpl implements PerformanceDAO {
     public PerformanceDTO findById(int performanceId) {
         // SELECT * FROM performance WHERE performance_id = ?
         // → 공연 상세 조회
-    	String sql = "SELECT performance_id, title, category, start_time, running_time, sales_status, booking_open, venue_id " +
-                "FROM performance WHERE performance_id = ?";
+    	String sql = "SELECT p.performance_id, p.title, p.category, p.start_time, p.running_time, "
+        		+ "p.sales_status, p.booking_open, p.venue_id, v.venue_name " +
+                     "FROM performance p JOIN venue v ON p.venue_id = v.venue_id "
+                     + "WHERE performance_id = ?";
 
 	   try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
 	       pstmt.setInt(1, performanceId);
 	
 	       try (ResultSet rs = pstmt.executeQuery()) {
 	           if (rs.next()) {
-	               return new PerformanceDTO(
-	                   rs.getInt("performance_id"),
-	                   rs.getString("title"),
-	                   rs.getString("category"),
-	                   rs.getTimestamp("start_time").toLocalDateTime(),
-	                   rs.getInt("running_time"),
-	                   SalesStatus.valueOf(rs.getString("sales_status")),
-	                   rs.getTimestamp("booking_open").toLocalDateTime(),
-	                   rs.getInt("venue_id")
-	               );
+	        	   PerformanceDTO performance = new PerformanceDTO(
+	        			   rs.getInt("performance_id"),
+	                       rs.getString("title"),
+	                       rs.getString("category"),
+	                       rs.getTimestamp("start_time").toLocalDateTime(),
+	                       rs.getInt("running_time"),
+	                       SalesStatus.valueOf(rs.getString("sales_status")),
+	                       rs.getTimestamp("booking_open").toLocalDateTime(),
+	                       rs.getInt("venue_id")
+	                       );
+	        	   performance.setVenueName(rs.getString("venue_name"));
 	           }
 	       }
 	   } catch (SQLException e) {
