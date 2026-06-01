@@ -21,10 +21,18 @@ public class PerformanceSeatDAOImpl implements PerformanceSeatDAO {
         // SELECT * FROM performance_seat WHERE performance_id = ?
         // → 관리자 가격 설정 화면에서 사용
     	List<PerformanceSeatDTO> list = new ArrayList<>();
-        String sql = "SELECT ps.performance_seat_id, ps.performance_id, ps.seat_id, ps.price, b.booking_status " +
-                     "FROM performance_seat ps " +
-                     "LEFT JOIN booking b ON ps.performance_seat_id = b.performance_seat_id AND b.booking_status IN ('HOLD', 'BOOKED') " +
-                     "WHERE ps.performance_id = ?";
+    	String sql =
+    		    "SELECT ps.performance_seat_id, " +
+    		    "       ps.performance_id, " +
+    		    "       ps.seat_id, " +
+    		    "       ps.price, " +
+    		    "       s.section, " +
+    		    "       b.booking_status " +
+    		    "FROM performance_seat ps " +
+    		    "JOIN seat s ON ps.seat_id = s.seat_id " +
+    		    "LEFT JOIN booking b ON ps.performance_seat_id = b.performance_seat_id " +
+    		    "                  AND b.booking_status IN ('HOLD', 'BOOKED') " +
+    		    "WHERE ps.performance_id = ?"; //쿼리 수정 - seat 조인 추가
 
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, performanceId);
@@ -37,7 +45,11 @@ public class PerformanceSeatDAOImpl implements PerformanceSeatDAO {
                         rs.getInt("seat_id"),
                         rs.getInt("price")
                     );
-
+                    //추가
+                    perfSeat.setSection(
+                    	    rs.getString("section")
+                    );
+                    
                     // booking_status가 존재한다면 이미 예약(선점)된 좌석이므로 true로 세팅
                     String status = rs.getString("booking_status");
                     if (status != null) {

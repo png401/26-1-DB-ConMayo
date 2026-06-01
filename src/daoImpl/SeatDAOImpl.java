@@ -22,25 +22,30 @@ public class SeatDAOImpl implements SeatDAO {
         // GROUP BY: 한 좌석에 리뷰 여러 개일 수 있으므로 AVG 집계 위해 묶음
         String sql = """
                 SELECT s.seat_id,
-                       s.venue_id,
-                       ps.performance_seat_id,
-                       s.section,
-                       s.row_num,
-                       s.col_num,
-                       ps.price,
-                       b.booking_status,
-                       AVG(r.seat_rating) AS avg_rating
-                FROM performance_seat ps
-                JOIN seat s
-                    ON ps.seat_id = s.seat_id
-                LEFT JOIN booking b
-                    ON b.performance_seat_id = ps.performance_seat_id
-                    AND b.booking_status IN ('BOOKED', 'HOLD')
-                LEFT JOIN review r
-                    ON r.booking_id = b.booking_id
-                WHERE ps.performance_id = ?
-                GROUP BY s.seat_id, s.venue_id, ps.performance_seat_id, s.section, s.row_num, s.col_num, ps.price, b.booking_status
-                ORDER BY s.section, s.row_num, s.col_num
+       s.venue_id,
+       ps.performance_seat_id,
+       s.section,
+       s.row_num,
+       s.col_num,
+       ps.price,
+       b.booking_status,
+       (
+           SELECT AVG(r2.seat_rating)
+           FROM review r2
+           JOIN booking b2 ON r2.booking_id = b2.booking_id
+           JOIN performance_seat ps2 ON b2.performance_seat_id = ps2.performance_seat_id
+           WHERE ps2.seat_id = s.seat_id
+        ) AS avg_rating
+        FROM performance_seat ps
+        JOIN seat s
+        ON ps.seat_id = s.seat_id
+        LEFT JOIN booking b
+        ON b.performance_seat_id = ps.performance_seat_id
+        AND b.booking_status IN ('BOOKED', 'HOLD')
+        WHERE ps.performance_id = ?
+        GROUP BY s.seat_id, s.venue_id, ps.performance_seat_id,
+         s.section, s.row_num, s.col_num, ps.price, b.booking_status
+        ORDER BY s.section, s.row_num, s.col_num
                 """;
 
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
