@@ -1,6 +1,7 @@
 package controller;
 import java.util.List;
 import dto.PerformanceDTO;
+import dto.PerformanceSeatDTO; //추가
 import service.PerformanceSeatService;
 import service.PerformanceService;
 import view.AdminView;
@@ -64,8 +65,12 @@ public class PerformanceController {
 
         PerformanceDTO performance =
                 performanceService.getPerformance(performanceId);
+        //추가
+        List<PerformanceSeatDTO> seatList =
+        	    perfSeatService.getSeatsByPerformance(performanceId);
 
-        performanceView.printDetail(performance, null);
+
+        performanceView.printDetail(performance, seatList); //수정 null -> seatList
 
         int action = performanceView.inputPerformanceId();
 
@@ -91,11 +96,15 @@ public class PerformanceController {
     // 3. 공연 상세 출력
     public void showDetail(int performanceId) {
         PerformanceDTO performance = performanceService.getPerformance(performanceId);
+        //추가
+        List<PerformanceSeatDTO> seatList =
+        	    perfSeatService.getSeatsByPerformance(performanceId);
+
         if (performance == null) {
             if (adminView != null) adminView.printError("해당 공연을 찾을 수 없습니다.");
             return;
         }
-        performanceView.printDetail(performance, null);
+        performanceView.printDetail(performance, seatList); //수정 null -> seatList
     }
 
     // 4. 공연 등록 (관리자)
