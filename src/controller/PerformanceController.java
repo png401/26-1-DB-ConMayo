@@ -1,6 +1,7 @@
 package controller;
 import java.util.List;
 import dto.PerformanceDTO;
+import service.PerformanceSeatService;
 import service.PerformanceService;
 import view.AdminView;
 import view.PerformanceView;
@@ -9,13 +10,16 @@ public class PerformanceController {
     private final PerformanceService performanceService;
     private final PerformanceView performanceView;
     private final AdminView adminView;
+    private final PerformanceSeatService perfSeatService;
 
     public PerformanceController(PerformanceService performanceService,
                                  PerformanceView performanceView,
-                                 AdminView adminView) {
+                                 AdminView adminView,
+                                 PerformanceSeatService perfSeatService) {
         this.performanceService = performanceService;
         this.performanceView = performanceView;
         this.adminView = adminView;
+        this.perfSeatService = perfSeatService;
     }
 
     // 1. 공연 목록 출력 (유저용 — 공연 선택 + 예매 흐름 포함, performanceId 반환)

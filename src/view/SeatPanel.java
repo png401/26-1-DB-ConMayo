@@ -22,7 +22,7 @@ public class SeatPanel extends JDialog {
         this.seats = seats;
         this.seatController = seatController;
         this.bookingController = bookingController;
-        this.memberId = memberId;//추가
+        this.memberId = memberId;
         initUI();
     }
 
@@ -69,7 +69,7 @@ public class SeatPanel extends JDialog {
         return panel;
     }
 
-    //중앙: STAGE + 구역별 좌석 그리드
+    // 중앙: STAGE + 구역별 좌석 그리드
     private JPanel makeSeatArea() {
         JPanel area = new JPanel(new BorderLayout(0, 10));
         area.setBorder(BorderFactory.createEmptyBorder(0, 20, 0, 20));
@@ -115,7 +115,7 @@ public class SeatPanel extends JDialog {
             sectionPanel.add(grid, BorderLayout.CENTER);
             sectionsPanel.add(sectionPanel);
         }
-        
+
         JScrollPane scrollPane = new JScrollPane(sectionsPanel);
         scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
@@ -123,7 +123,7 @@ public class SeatPanel extends JDialog {
         return area;
     }
 
-    //  좌석 버튼 생성
+    // 좌석 버튼 생성
     private JButton makeSeatButton(SeatDTO seat) {
         JButton btn = new JButton("<html><center>"
                 + seat.getRowNum() + "<br>" + seat.getColNum()
@@ -133,10 +133,10 @@ public class SeatPanel extends JDialog {
         btn.setBorderPainted(false);
         btn.setFont(new Font("맑은 고딕", Font.PLAIN, 10));
 
-        if (seat.isBooked()) { // ← 추가
-            btn.setBackground(new Color(180, 180, 180));
-            btn.setEnabled(false); // 클릭 불가
-            btn.setToolTipText("이미 선택된 좌석입니다.");
+        if (seat.isBooked()) {
+            btn.setBackground(getColor(seat.getColor())); // 평점 색깔 유지
+            btn.setEnabled(false);                        // 클릭만 불가
+            btn.setToolTipText("이미 예매된 좌석입니다.");
         } else {
             btn.setBackground(getColor(seat.getColor()));
             btn.addActionListener(e -> {
@@ -149,7 +149,7 @@ public class SeatPanel extends JDialog {
         return btn;
     }
 
-    //하단: 선택 좌석 정보 + 결제 버튼
+    // 하단: 선택 좌석 정보 + 뒤로가기 + 결제 버튼
     private JPanel makeBottomPanel() {
         JPanel panel = new JPanel(new BorderLayout(0, 5));
         panel.setBorder(BorderFactory.createEmptyBorder(5, 20, 15, 20));
@@ -171,12 +171,21 @@ public class SeatPanel extends JDialog {
                 JOptionPane.showMessageDialog(this, "좌석을 먼저 선택해주세요.");
                 return;
             }
-
             bookingController.book(memberId, selectedSeat.getPerformanceSeatId(), selectedSeat.getPrice());
             dispose();
         });
 
-        JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        JButton backBtn = new JButton("뒤로가기");
+        backBtn.setBackground(new Color(180, 180, 180));
+        backBtn.setForeground(Color.WHITE);
+        backBtn.setOpaque(true);
+        backBtn.setBorderPainted(false);
+        backBtn.setFont(new Font("맑은 고딕", Font.BOLD, 14));
+        backBtn.setPreferredSize(new Dimension(150, 40));
+        backBtn.addActionListener(e -> dispose());
+
+        JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 0));
+        btnPanel.add(backBtn);
         btnPanel.add(payBtn);
         panel.add(btnPanel, BorderLayout.SOUTH);
 
