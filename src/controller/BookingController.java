@@ -54,7 +54,13 @@ public class BookingController {
 
         switch (action) {
             case 1 -> handleCancel(selected);
-            case 2 -> reviewController.writeReview(selected.getBookingId()); // 수정
+            case 2 -> {
+            	if(selected.getBookingStatus() != BookingStatus.BOOKED){
+            		bookingView.printError("예매 완료 상태에서만 리뷰를 작성할 수 있습니다");
+            	} else {
+            		reviewController.writeReview(selected.getBookingId());
+            	}
+            }
             case 0 -> { }
             default -> bookingView.printError("올바른 번호를 입력해주세요.");
         }
