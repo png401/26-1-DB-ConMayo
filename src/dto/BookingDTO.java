@@ -10,12 +10,13 @@ public class BookingDTO {
     private BookingStatus bookingStatus;   // 예매 상태 (HOLD / BOOKED / CANCELED)
     private LocalDateTime bookedAt;	// 예매 시각 (DEFAULT CURRENT_TIMESTAMP)
     private int payment;            // 실결제 금액 (HOLD면 0)
+    private String performanceTitle; // 공연
     
     public BookingDTO() {}
 
 	public BookingDTO(int bookingId, String memberId, 
 			int performanceSeatId, BookingStatus bookingStatus,
-			LocalDateTime bookedAt, int payment) {
+			LocalDateTime bookedAt, int payment, String performanceTitle) {
 		super();
 		this.bookingId = bookingId;
 		this.memberId = memberId;
@@ -23,6 +24,8 @@ public class BookingDTO {
 		this.bookingStatus = bookingStatus;
 		this.bookedAt = bookedAt;
 		this.payment = payment;
+		this.performanceTitle = performanceTitle;
+	
 	}
 
 	public int getBookingId() {
@@ -71,6 +74,14 @@ public class BookingDTO {
 
 	public void setPayment(int payment) {
 		this.payment = payment;
+	}
+	
+	public String getPerformanceTitle() {
+		return performanceTitle;
+	}
+	
+	public void setPerformanceTitle(String performanceTitle) {
+		this.performanceTitle = performanceTitle;
 	}
 	
 }

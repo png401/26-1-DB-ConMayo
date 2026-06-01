@@ -49,7 +49,13 @@ public class BookingDAOImpl implements BookingDAO {
 
     @Override
     public List<BookingDTO> findByMemberId(String memberId) {
-        String sql = "SELECT * FROM booking WHERE member_id = ? ORDER BY booked_at DESC";
+        String sql = "SELECT * "
+        		+ "FROM booking b "
+        		+ "JOIN performance_seat ps "
+        		+ "ON b.performance_seat_id = ps.performance_seat_id "
+        		+ "JOIN performance p "
+        		+ "ON p.performance_id = ps.performance_id "
+        		+ "WHERE member_id = ? ORDER BY booked_at DESC ";
         List<BookingDTO> list = new ArrayList<>();
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, memberId);
@@ -103,6 +109,9 @@ public class BookingDAOImpl implements BookingDAO {
         Timestamp ts = rs.getTimestamp("booked_at");
         if (ts != null) dto.setBookedAt(ts.toLocalDateTime());
         dto.setPayment(rs.getInt("payment"));
+        
+        try { dto.setPerformanceTitle(rs.getString("title")); } catch (SQLException ignored) {}
+        
         return dto;
     }
 
