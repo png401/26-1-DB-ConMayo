@@ -104,13 +104,15 @@ public class SeatPanel extends JDialog {
             sectionMap.computeIfAbsent(seat.getSection(), k -> new ArrayList<>()).add(seat);
         }
 
-        JPanel sectionsPanel = new JPanel(new GridLayout(1, sectionMap.size(), 10, 0));
+        JPanel sectionsPanel = new JPanel();
+        sectionsPanel.setLayout(new BoxLayout(sectionsPanel, BoxLayout.Y_AXIS));
 
         for (Map.Entry<String, List<SeatDTO>> entry : sectionMap.entrySet()) {
             String section = entry.getKey();
             List<SeatDTO> sectionSeats = entry.getValue();
             
             sectionSeats.sort(Comparator.comparingInt(SeatDTO::getRowNum)
+                    
                     .thenComparingInt(SeatDTO::getColNum));
 
             JPanel sectionPanel = new JPanel(new BorderLayout(0, 5));
