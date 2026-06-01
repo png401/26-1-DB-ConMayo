@@ -1,6 +1,4 @@
 package view;
-import java.util.Map;
-import java.util.LinkedHashMap;
 import dto.PerformanceDTO;
 import dto.PerformanceSeatDTO;
 import dto.SalesStatus;
@@ -10,6 +8,9 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Scanner;
+import controller.SeatController;
+
+
 public class PerformanceView {
     private final Scanner sc = new Scanner(System.in);
     
@@ -59,26 +60,11 @@ public class PerformanceView {
         if (seatList == null || seatList.isEmpty()) {
             System.out.println("등록된 좌석 가격 정보가 없습니다.\n");
         } else {
-        	System.out.println("\n=== 좌석 가격 ===");
-
-        	Map<String, Integer> priceMap = new LinkedHashMap<>();
-
-        	for (PerformanceSeatDTO seat : seatList) {
-
-        	    String section = seat.getSection();
-
-        	    if (section == null) {
-        	        section = "UNKNOWN";
-        	    }
-
-        	    priceMap.putIfAbsent(section, seat.getPrice());
-        	}
-
-        	for (Map.Entry<String, Integer> entry : priceMap.entrySet()) {
-        	    System.out.printf("%-10s : %,d원\n",
-        	            entry.getKey(),
-        	            entry.getValue());
-        	}
+            for (PerformanceSeatDTO seat : seatList) {
+            	String gradeName = (seat.getSection() != null) ? seat.getSection() : "등급" + seat.getSeatId();
+            	System.out.printf("%s %,d원\n", gradeName, seat.getPrice());
+            }
+            System.out.println();
         }
         
         System.out.println("1. 예매하기 0. 뒤로");

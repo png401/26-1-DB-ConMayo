@@ -54,6 +54,8 @@ public class SeatDTO {
 	
 	public boolean isBooked() { return isBooked; }
 	public void setBooked(boolean isBooked) { this.isBooked = isBooked; }
+	
+	
 
 	@Override
 	public String toString() {

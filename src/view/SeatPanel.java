@@ -68,7 +68,21 @@ public class SeatPanel extends JDialog {
         }
         return panel;
     }
-
+    
+    private int getSectionPriority(SeatDTO seat) {
+    	String section = seat.getSection();
+    	switch(section) {
+    		case "VIP"  : return 1;
+    		case "STANDING": return 1;
+    		case "GROUND" : return 1;
+    		case "R" : return 2;
+    		case "1층" : return 2;
+    		case "S" : return 3;
+    		case "2층" : return 3;
+    		default : return 4;
+    		}
+    }
+    
     // 중앙: STAGE + 구역별 좌석 그리드
     private JPanel makeSeatArea() {
         JPanel area = new JPanel(new BorderLayout(0, 10));
@@ -81,7 +95,9 @@ public class SeatPanel extends JDialog {
         stage.setFont(new Font("맑은 고딕", Font.BOLD, 14));
         stage.setPreferredSize(new Dimension(0, 40));
         area.add(stage, BorderLayout.NORTH);
-
+        
+        seats.sort(Comparator.comparingInt(this::getSectionPriority));
+        
         // section 기준으로 그룹핑
         Map<String, List<SeatDTO>> sectionMap = new LinkedHashMap<>();
         for (SeatDTO seat : seats) {
@@ -93,6 +109,9 @@ public class SeatPanel extends JDialog {
         for (Map.Entry<String, List<SeatDTO>> entry : sectionMap.entrySet()) {
             String section = entry.getKey();
             List<SeatDTO> sectionSeats = entry.getValue();
+            
+            sectionSeats.sort(Comparator.comparingInt(SeatDTO::getRowNum)
+                    .thenComparingInt(SeatDTO::getColNum));
 
             JPanel sectionPanel = new JPanel(new BorderLayout(0, 5));
 
@@ -105,9 +124,9 @@ public class SeatPanel extends JDialog {
             int maxCol = sectionSeats.stream().mapToInt(SeatDTO::getColNum).max().orElse(1);
 
             JPanel grid = new JPanel(new GridLayout(maxRow, maxCol, 4, 4));
-
-            sectionSeats.sort(Comparator.comparingInt(SeatDTO::getRowNum)
-                    .thenComparingInt(SeatDTO::getColNum));
+            
+            
+            
 
             for (SeatDTO seat : sectionSeats) {
                 grid.add(makeSeatButton(seat));
@@ -149,7 +168,7 @@ public class SeatPanel extends JDialog {
         return btn;
     }
 
-    // 하단: 선택 좌석 정보 + 뒤로가기 + 결제 버튼
+    // 하단: 선택 좌석 정보 + 가격 + 뒤로가기 + 결제 버튼 
     private JPanel makeBottomPanel() {
         JPanel panel = new JPanel(new BorderLayout(0, 5));
         panel.setBorder(BorderFactory.createEmptyBorder(5, 20, 15, 20));
@@ -194,8 +213,8 @@ public class SeatPanel extends JDialog {
 
     // 선택 좌석 정보 라벨 업데이트
     private void updateSelectedInfo(SeatDTO seat) {
-        String info = String.format("선택 : %s구역 %d행 %d열  |  ★ %.1f점",
-                seat.getSection(), seat.getRowNum(), seat.getColNum(), seat.getAvgRating());
+        String info = String.format("선택 : %s구역 %d행 %d열  | 가격 : %d | ★ %.1f점",
+                seat.getSection(), seat.getRowNum(), seat.getColNum(), seat.getPrice(), seat.getAvgRating());
         selectedInfoLabel.setText(info);
     }
 
