@@ -36,11 +36,11 @@ public class ReviewService {
 
         // 2. 공연 시작 후인지 확인 (코드로 막기로 했던 것 반영)
         // TODO: BookingDAO에 getPerformanceStartTime() 추가 후 주석 해제
-        // LocalDateTime startTime = bookingDAO.getPerformanceStartTime(review.getBookingId());
-        // if (startTime == null || LocalDateTime.now().isBefore(startTime)) {
-        //     System.out.println("공연 시작 후에만 리뷰를 작성할 수 있습니다.");
-        //     return false;
-        // }
+        LocalDateTime startTime = bookingDAO.getPerformanceStartTime(review.getBookingId());
+        if (startTime == null || LocalDateTime.now().isBefore(startTime)) {
+        	System.out.println("공연 시작 후에만 리뷰를 작성할 수 있습니다.");
+            return false;
+        }
 
         // 3. 중복 리뷰 확인 (1예매 1리뷰)
         if (reviewDAO.existsByBookingId(review.getBookingId())) {

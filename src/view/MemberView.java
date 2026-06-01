@@ -7,14 +7,13 @@ public class MemberView {
  // 메인 메뉴 출력 후 선택값 반환
     public int showMenu() { 
     	
-    	System.out.print("""
-    			====== 콘마요 예매 시스템 ======
-    			1. 로그인
-    			2. 회원가입
-    			0. 종료
-    			
-    			선택 > """);
-    	
+    	System.out.println("====== 콘마요 예매 시스템 ======");
+    	System.out.println("1. 로그인");
+    	System.out.println("2. 회원가입");
+    	System.out.println("0. 종료");
+    	System.out.println();
+    	System.out.print("선택 > ");
+
     	int menu = sc.nextInt();
     	sc.nextLine();
     	
@@ -23,13 +22,12 @@ public class MemberView {
     }
     
     public int showUserMenu() {
-        System.out.print("""
-    ====== 회원 메뉴 ======
-    1. 공연 조회
-    2. 내 예매 조회
-    0. 로그아웃
-
-    선택 > """);
+    	System.out.println("====== 회원 메뉴 ======");
+    	System.out.println("1. 공연 조회");
+    	System.out.println("2. 내 예매 조회");
+    	System.out.println("0. 로그아웃");
+    	System.out.println();
+    	System.out.print("선택 > ");
 
         int menu = sc.nextInt();
         sc.nextLine();

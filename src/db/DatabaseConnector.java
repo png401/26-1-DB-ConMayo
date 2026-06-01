@@ -1,36 +1,32 @@
 package db;
-
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Properties;
 
 public class DatabaseConnector {
-
-    // MariaDB 연결 정보
-	private static String URL;
+    private static String URL;
     private static String USER;
     private static String PASSWORD;
 
     static {
-    	
-    	Properties props = new Properties();
-    	
-    	try (FileInputStream fis =
-    	         new FileInputStream("src/db/db.properties")) {
+        Properties props = new Properties();
 
-    	    props.load(fis);
-
-    	    URL = props.getProperty("url");
-    	    USER = props.getProperty("user");
-    	    PASSWORD = props.getProperty("password");
-
-    	} catch (IOException e) {
-    	    e.printStackTrace();
-    	}
-        
+        try (InputStream is =
+                DatabaseConnector.class.getClassLoader().getResourceAsStream("db/db.properties")) {
+            if (is == null) {
+                System.out.println("db.properties 파일을 찾을 수 없습니다.");
+            } else {
+                props.load(is);
+                URL = props.getProperty("url");
+                USER = props.getProperty("user");
+                PASSWORD = props.getProperty("password");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     // 외부에서 인스턴스 생성 방지 (유틸 클래스)
