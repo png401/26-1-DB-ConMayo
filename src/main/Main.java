@@ -1,7 +1,7 @@
 package main;
 // Main.java
 import db.DatabaseConnector;
-
+import db.TransactionManager;
 import dao.MemberDAO;
 import dao.VenueDAO;
 import dao.PerformanceDAO;
@@ -51,6 +51,7 @@ public class Main {
 		try {
 			// ① DB 연결 — 하나의 Connection을 모든 DAOImpl이 공유
 			Connection conn = DatabaseConnector.getConnection();
+			TransactionManager tm = new TransactionManager(conn);
 
 			// ② DAOImpl 생성 — conn 주입
 			// 인터페이스 타입으로 선언 -> Service는 구현체를 모름
@@ -71,7 +72,7 @@ public class Main {
 			PerformanceService performanceService   = new PerformanceService(performanceDAO);
 			SeatService seatService                 = new SeatService(seatDAO);
 			PerformanceSeatService perfSeatService  = new PerformanceSeatService(perfSeatDAO);
-			BookingService bookingService           = new BookingService(bookingDAO, cancellationDAO);
+			BookingService bookingService           = new BookingService(bookingDAO, cancellationDAO, tm);
 			ReviewService reviewService             = new ReviewService(reviewDAO, bookingDAO);
 
 			// ④ View 생성 — 콘솔 입출력 담당

@@ -125,5 +125,30 @@ public class BookingDAOImpl implements BookingDAO {
             throw new RuntimeException("공연 시작 시간 조회 실패: " + e.getMessage(), e);
         }
         return null;
-    }    
+    }
+    
+    @Override
+    public void lockSeat(int performanceSeatId) {
+        String sql = "SELECT * FROM performance_seat WHERE performance_seat_id = ? FOR UPDATE";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, performanceSeatId);
+            pstmt.executeQuery();
+        } catch (SQLException e) {
+            throw new RuntimeException("좌석 락 실패: " + e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public boolean isAlreadyBooked(int performanceSeatId) {
+        String sql = "SELECT COUNT(*) FROM booking WHERE performance_seat_id = ? AND booking_status IN ('BOOKED', 'HOLD')";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, performanceSeatId);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) return rs.getInt(1) > 0;
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("예매 중복 확인 실패: " + e.getMessage(), e);
+        }
+        return false;
+    }
 }
