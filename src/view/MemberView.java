@@ -22,7 +22,7 @@ public class MemberView {
     }
     
     public int showUserMenu() {
-    	System.out.println("====== 회원 메뉴 ======");
+    	System.out.println("\n====== 회원 메뉴 ======");
     	System.out.println("1. 공연 조회");
     	System.out.println("2. 내 예매 조회");
     	System.out.println("0. 로그아웃");
