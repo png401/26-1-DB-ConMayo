@@ -63,10 +63,10 @@ public class MemberService {
         memberDAO.setBlacklist(memberId, blacklistUntil);
     }
     
-    public void releaseBlacklist(String memberId) {
+    public boolean releaseBlacklist(String memberId) {
         // 블랙리스트 해제
 
-        memberDAO.releaseBlacklist(memberId);
+    	return memberDAO.releaseBlacklist(memberId);
     }
     
 }
