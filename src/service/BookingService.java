@@ -8,6 +8,7 @@ import dto.BookingStatus;
 import dto.CancellationDTO;
 import dto.CancelStatus;
 
+import java.sql.Connection;
 import java.util.List;
 
 public class BookingService {
@@ -22,16 +23,14 @@ public class BookingService {
     }
 
     public void book(BookingDTO booking) {
-    	try {
-            tm.begin();
-            bookingDAO.lockSeat(booking.getPerformanceSeatId()); // 락 획득
-         // 이미 BOOKED/HOLD인지 확인
-            if (bookingDAO.isAlreadyBooked(booking.getPerformanceSeatId())) {
+        try {
+            Connection conn = tm.begin();
+            bookingDAO.lockSeat(conn, booking.getPerformanceSeatId());
+            if (bookingDAO.isAlreadyBooked(conn, booking.getPerformanceSeatId())) {
                 throw new RuntimeException("이미 예매된 좌석입니다.");
             }
-
-            bookingDAO.insert(booking);
-            bookingDAO.updateStatus(booking.getBookingId(), BookingStatus.BOOKED.name());
+            bookingDAO.insert(conn, booking);
+            bookingDAO.updateStatus(conn, booking.getBookingId(), BookingStatus.BOOKED.name());
             booking.setBookingStatus(BookingStatus.BOOKED);
             tm.commit();
         } catch (Exception e) {
@@ -51,23 +50,21 @@ public class BookingService {
     }
 
     public void cancel(int bookingId, int cancelFee) {
-    	BookingDTO booking = bookingDAO.findById(bookingId);
+        BookingDTO booking = bookingDAO.findById(bookingId); // 트랜잭션 밖 — 그냥 getConnection()
         if (booking == null)
             throw new RuntimeException("존재하지 않는 예매입니다.");
         if (booking.getBookingStatus() != BookingStatus.BOOKED)
             throw new RuntimeException("취소 가능한 예매가 아닙니다.");
 
         try {
-            tm.begin();
-            bookingDAO.updateStatus(bookingId, BookingStatus.CANCELED.name());
-
+            Connection conn = tm.begin(); // conn 받아서
+            bookingDAO.updateStatus(conn, bookingId, BookingStatus.CANCELED.name()); // conn 넘김
             CancellationDTO cancellation = new CancellationDTO();
             cancellation.setBookingId(bookingId);
             cancellation.setRefundAmount(booking.getPayment() - cancelFee);
             cancellation.setCancellationFee(cancelFee);
             cancellation.setCancelStatus(CancelStatus.REQUESTED);
-            cancellationDAO.insert(cancellation);
-
+            cancellationDAO.insert(conn, cancellation); // conn 넘김
             tm.commit();
         } catch (Exception e) {
             tm.rollback();

@@ -4,14 +4,12 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 public class TransactionManager {
-    private final Connection conn;
+    private Connection conn;
 
-    public TransactionManager(Connection conn) {
-        this.conn = conn;
-    }
-
-    public void begin() throws SQLException {
+    public Connection begin() throws SQLException {
+        conn = DatabaseConnector.getConnection();
         conn.setAutoCommit(false);
+        return conn; // BookingService한테 conn 넘겨줌
     }
 
     public void commit() throws SQLException {
@@ -23,6 +21,10 @@ public class TransactionManager {
     }
 
     public void end() {
-        try { conn.setAutoCommit(true); } catch (SQLException e) { e.printStackTrace(); }
+        try {
+            conn.setAutoCommit(true);
+            conn.close();
+            conn = null;
+        } catch (SQLException e) { e.printStackTrace(); }
     }
 }

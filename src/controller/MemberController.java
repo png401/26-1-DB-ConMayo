@@ -1,4 +1,6 @@
 package controller;
+
+import db.DatabaseConnector;
 import service.MemberService;
 import view.AdminView;
 import view.MemberView;
@@ -17,16 +19,15 @@ public class MemberController {
     private final MemberService memberService;
     private final MemberView memberView;
     private final AdminView adminView;
-	private final PerformanceController performanceController;
-	private final BookingController bookingController;
-	private final PerformanceSeatController performanceSeatController;
-	private final VenueController venueController;
-	private final SeatController seatController;
-	private final SeatView seatView;
-	
-	private ReviewController reviewController;//추가
-	
-    
+    private final PerformanceController performanceController;
+    private final BookingController bookingController;
+    private final PerformanceSeatController performanceSeatController;
+    private final VenueController venueController;
+    private final SeatController seatController;
+    private final SeatView seatView;
+
+    private ReviewController reviewController; // 추가
+
     public MemberController(
             MemberService memberService,
             MemberView memberView,
@@ -48,13 +49,13 @@ public class MemberController {
         this.seatController = seatController;
         this.seatView = seatView;
     }
-    
+
     public void setReviewController(ReviewController reviewController) {
         this.reviewController = reviewController;
     }
-    
+
     private void runUserMenu(MemberDTO loginMember) {
-    	seatController.setMemberId(loginMember.getMemberId());
+        seatController.setMemberId(loginMember.getMemberId());
 
         while (true) {
 
@@ -63,7 +64,7 @@ public class MemberController {
             switch (menu) {
 
                 case 1:
-                	int performanceId = performanceController.showList();
+                    int performanceId = performanceController.showList();
                     if (performanceId != 0) {
                         List<SeatDTO> seats = seatController.openSeatPanel(performanceId);
                         int availableCount = seatController.getAvailableCount(performanceId);
@@ -73,11 +74,11 @@ public class MemberController {
 
                 case 2:
                     bookingController.showMyBookings(
-                            loginMember.getMemberId(), reviewController);//reviewController 추가 
+                            loginMember.getMemberId(), reviewController); // reviewController 추가
                     break;
-                    
 
                 case 0:
+                    DatabaseConnector.reset(); // 로그아웃 시 기본 계정으로 복귀
                     return;
 
                 default:
@@ -85,7 +86,7 @@ public class MemberController {
             }
         }
     }
-    
+
     private void runAdminMenu() {
 
         while (true) {
@@ -95,28 +96,28 @@ public class MemberController {
             switch (menu) {
 
                 case 1:
-                	// 공연 추가 
+                    // 공연 추가
                     performanceController.add();
                     break;
 
                 case 2:
                     // 공연 수정
-                	performanceController.modify();
+                    performanceController.modify();
                     break;
 
                 case 3:
                     // 공연 삭제
-                	performanceController.remove();
+                    performanceController.remove();
                     break;
 
                 case 4:
-                    // 공연장 관리 
-                	runVenueManageMenu();
+                    // 공연장 관리
+                    runVenueManageMenu();
                     break;
 
                 case 5:
                     // 좌석 가격 설정
-                	performanceSeatController.modifyPrice();
+                    performanceSeatController.modifyPrice();
                     break;
 
                 case 6:
@@ -124,6 +125,7 @@ public class MemberController {
                     break;
 
                 case 0:
+                    DatabaseConnector.reset(); // 로그아웃 시 기본 계정으로 복귀
                     return;
 
                 default:
@@ -131,8 +133,7 @@ public class MemberController {
             }
         }
     }
-    
-    
+
     private void runVenueManageMenu() {
 
         while (true) {
@@ -142,15 +143,15 @@ public class MemberController {
             switch (menu) {
 
                 case 1:
-                	venueController.add();
+                    venueController.add();
                     break;
 
                 case 2:
-                	venueController.modify();
+                    venueController.modify();
                     break;
 
                 case 3:
-                	venueController.remove();
+                    venueController.remove();
                     break;
 
                 case 0:
@@ -161,7 +162,7 @@ public class MemberController {
             }
         }
     }
-    
+
     private void runMemberManageMenu() {
 
         while (true) {
@@ -190,10 +191,8 @@ public class MemberController {
             }
         }
     }
-    
-    
 
- // 로그인/회원가입 메뉴 진입점
+    // 로그인/회원가입 메뉴 진입점
     public void start() {
 
         while (true) {
@@ -211,8 +210,10 @@ public class MemberController {
                     }
 
                     if (loginMember.getMemberRole() == MemberRole.ADMIN) {
+                        DatabaseConnector.init(MemberRole.ADMIN); // 관리자 계정으로 전환
                         runAdminMenu();
-                    } else { //로그인 성공
+                    } else { // 로그인 성공
+                        DatabaseConnector.init(MemberRole.USER);  // 일반 회원 계정으로 전환
                         runUserMenu(loginMember);
                     }
 
@@ -230,25 +231,24 @@ public class MemberController {
             }
         }
     }
-    
-    
- // 로그인 처리 (블랙리스트 체크 포함)
-    public MemberDTO login() { 
 
-    	String memberId = memberView.inputId();
+    // 로그인 처리 (블랙리스트 체크 포함)
+    public MemberDTO login() {
+
+        String memberId = memberView.inputId();
         String passwd = memberView.inputPassword();
 
         MemberDTO member = memberService.login(memberId, passwd);
 
         if (member == null) {
-        	memberView.printError("아이디 또는 비밀번호가 올바르지 않습니다.");
-        	return null;
+            memberView.printError("아이디 또는 비밀번호가 올바르지 않습니다.");
+            return null;
         }
 
         if (memberService.isBlacklisted(member)) {
 
             String until = member.getBlacklistUntil().format(
-            		DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
+                    DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
 
             memberView.printBlacklistWarning(until);
             return null;
@@ -257,61 +257,54 @@ public class MemberController {
         memberView.printLoginSuccess(member);
 
         return member;
-    
     }
-    
-    
- // 회원가입 처리
+
+    // 회원가입 처리
     public void register() {
-    	
-    	String memberId = memberView.inputId();
+
+        String memberId = memberView.inputId();
 
         try {
-			if (memberService.isDuplicatedId(memberId)) {
-				memberView.printError("중복된 아이디입니다.");
-			    return;
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-        
+            if (memberService.isDuplicatedId(memberId)) {
+                memberView.printError("중복된 아이디입니다.");
+                return;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
         String passwd = memberView.inputPassword();
-    	
-    	MemberDTO member = memberView.inputMemberInfo();
-    	memberService.register(memberId, passwd, member);
-    	memberView.printSuccess("회원가입이 완료되었습니다.");
-    	
+
+        MemberDTO member = memberView.inputMemberInfo();
+        memberService.register(memberId, passwd, member);
+        memberView.printSuccess("회원가입이 완료되었습니다.");
     }
-    
-    
- // 현재 블랙리스트 출력
+
+    // 현재 블랙리스트 출력
     public void showBlacklist() {
-    	
-    	List<MemberDTO> blacklist = memberService.getCurrentBlacklist();
+
+        List<MemberDTO> blacklist = memberService.getCurrentBlacklist();
 
         if (blacklist.isEmpty()) {
-        	adminView.printError("현재 블랙리스트 회원이 없습니다.");
-        	return;
+            adminView.printError("현재 블랙리스트 회원이 없습니다.");
+            return;
         }
 
         adminView.printBlacklist(blacklist);
-    	
     }
-    
- // 수동 블랙리스트 등록
+
+    // 수동 블랙리스트 등록
     public void addBlacklist() {
-    	
-    	String memberId = adminView.inputMemberIdToBlacklist();
-    	memberService.addToBlacklist(memberId);
-    	adminView.printSuccess("블랙리스트 등록이 완료되었습니다.");
-    	
+
+        String memberId = adminView.inputMemberIdToBlacklist();
+        memberService.addToBlacklist(memberId);
+        adminView.printSuccess("블랙리스트 등록이 완료되었습니다.");
     }
-    
-    
- // 블랙리스트 해제
+
+    // 블랙리스트 해제
     public void releaseBlacklist() {
-    	
-    	String memberId = adminView.inputMemberIdToBlacklist();
+
+        String memberId = adminView.inputMemberIdToBlacklist();
 
         boolean success = memberService.releaseBlacklist(memberId);
 

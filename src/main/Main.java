@@ -1,4 +1,5 @@
 package main;
+
 // Main.java
 import db.DatabaseConnector;
 import db.TransactionManager;
@@ -43,69 +44,58 @@ import view.ReviewView;
 import view.SeatView;
 import view.AdminView;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-
 public class Main {
-	public static void main(String[] args) {
-		try {
-			// ① DB 연결 — 하나의 Connection을 모든 DAOImpl이 공유
-			Connection conn = DatabaseConnector.getConnection();
-			TransactionManager tm = new TransactionManager(conn);
+    public static void main(String[] args) {
 
-			// ② DAOImpl 생성 — conn 주입
-			// 인터페이스 타입으로 선언 -> Service는 구현체를 모름
-			MemberDAO memberDAO                   = new MemberDAOImpl(conn);
-			VenueDAO venueDAO                     = new VenueDAOImpl(conn);
-			PerformanceDAO performanceDAO         = new PerformanceDAOImpl(conn);
-			SeatDAO seatDAO                       = new SeatDAOImpl(conn);
-			PerformanceSeatDAO perfSeatDAO        = new PerformanceSeatDAOImpl(conn);
-			BookingDAO bookingDAO                 = new BookingDAOImpl(conn);
-			ReviewDAO reviewDAO                   = new ReviewDAOImpl(conn);
-			CancellationDAO cancellationDAO       = new CancellationDAOImpl(conn);
+        // ① TransactionManager 생성 — conn 없이 생성 (begin()에서 getConnection() 호출)
+        TransactionManager tm = new TransactionManager();
 
-			// ③ Service 생성 — DAO 주입
-			// BookingService는 취소 트랜잭션을 위해 cancellationDAO도 같이 주입
-			// ReviewService는 BOOKED 상태 체크를 위해 bookingDAO도 같이 주입
-			MemberService memberService             = new MemberService(memberDAO);
-			VenueService venueService               = new VenueService(venueDAO);
-			PerformanceService performanceService   = new PerformanceService(performanceDAO);
-			SeatService seatService                 = new SeatService(seatDAO);
-			PerformanceSeatService perfSeatService  = new PerformanceSeatService(perfSeatDAO);
-			BookingService bookingService           = new BookingService(bookingDAO, cancellationDAO, tm);
-			ReviewService reviewService             = new ReviewService(reviewDAO, bookingDAO);
+        // ② DAOImpl 생성 — conn 주입 없음 (매번 getConnection() 호출)
+        // 인터페이스 타입으로 선언 -> Service는 구현체를 모름
+        MemberDAO memberDAO                   = new MemberDAOImpl();
+        VenueDAO venueDAO                     = new VenueDAOImpl();
+        PerformanceDAO performanceDAO         = new PerformanceDAOImpl();
+        SeatDAO seatDAO                       = new SeatDAOImpl();
+        PerformanceSeatDAO perfSeatDAO        = new PerformanceSeatDAOImpl();
+        BookingDAO bookingDAO                 = new BookingDAOImpl();
+        ReviewDAO reviewDAO                   = new ReviewDAOImpl();
+        CancellationDAO cancellationDAO       = new CancellationDAOImpl();
 
-			// ④ View 생성 — 콘솔 입출력 담당
-			// SeatPanel은 SeatController 안에서 직접 new 함 (Swing이라 별도)
-			MemberView memberView           = new MemberView();
-			PerformanceView performanceView = new PerformanceView();
-			BookingView bookingView         = new BookingView();
-			ReviewView reviewView           = new ReviewView();
-			AdminView adminView             = new AdminView(); // 관리자 전용 뷰
+        // ③ Service 생성 — DAO 주입
+        // BookingService는 취소 트랜잭션을 위해 cancellationDAO도 같이 주입
+        // ReviewService는 BOOKED 상태 체크를 위해 bookingDAO도 같이 주입
+        MemberService memberService             = new MemberService(memberDAO);
+        VenueService venueService               = new VenueService(venueDAO);
+        PerformanceService performanceService   = new PerformanceService(performanceDAO);
+        SeatService seatService                 = new SeatService(seatDAO);
+        PerformanceSeatService perfSeatService  = new PerformanceSeatService(perfSeatDAO);
+        BookingService bookingService           = new BookingService(bookingDAO, cancellationDAO, tm);
+        ReviewService reviewService             = new ReviewService(reviewDAO, bookingDAO);
 
-			// ⑤ Controller 생성 — Service + View 주입
-			// MemberController는 블랙리스트(관리자 기능)도 담당 -> adminView도 주입
-			// PerformanceController는 공연 등록/수정/삭제(관리자) -> adminView도 주입
-			PerformanceController performanceController   = new PerformanceController(performanceService, performanceView, adminView, perfSeatService);
-			BookingController bookingController           = new BookingController(bookingService, bookingView);
-			SeatController seatController                 = new SeatController(seatService, bookingController);
-			SeatView seatView = new SeatView(seatController, bookingController);
-			ReviewController reviewController             = new ReviewController(reviewService, reviewView);
-			VenueController venueController               = new VenueController(venueService, adminView);
-			PerformanceSeatController perfSeatController  = new PerformanceSeatController(perfSeatService, adminView);
-			MemberController memberController             = new MemberController(memberService, memberView, adminView, 
-																performanceController, bookingController, perfSeatController, venueController, seatController, seatView);
-			memberController.setReviewController(reviewController); //추가
-			
-			
-			// ⑥ 프로그램 시작 — 로그인 화면부터 시작
-			// 로그인 후 USER면 일반 메뉴, ADMIN이면 관리자 메뉴로 분기
-			memberController.start();
+        // ④ View 생성 — 콘솔 입출력 담당
+        // SeatPanel은 SeatController 안에서 직접 new 함 (Swing이라 별도)
+        MemberView memberView           = new MemberView();
+        PerformanceView performanceView = new PerformanceView();
+        BookingView bookingView         = new BookingView();
+        ReviewView reviewView           = new ReviewView();
+        AdminView adminView             = new AdminView(); // 관리자 전용 뷰
 
-		} catch (SQLException e) {
-			// DB 연결 실패 시 종료
-			System.out.println("DB 연결 실패: " + e.getMessage());
-		}
-	}
+        // ⑤ Controller 생성 — Service + View 주입
+        // MemberController는 블랙리스트(관리자 기능)도 담당 -> adminView도 주입
+        // PerformanceController는 공연 등록/수정/삭제(관리자) -> adminView도 주입
+        PerformanceController performanceController   = new PerformanceController(performanceService, performanceView, adminView, perfSeatService);
+        BookingController bookingController           = new BookingController(bookingService, bookingView);
+        SeatController seatController                 = new SeatController(seatService, bookingController);
+        SeatView seatView                             = new SeatView(seatController, bookingController);
+        ReviewController reviewController             = new ReviewController(reviewService, reviewView);
+        VenueController venueController               = new VenueController(venueService, adminView);
+        PerformanceSeatController perfSeatController  = new PerformanceSeatController(perfSeatService, adminView);
+        MemberController memberController             = new MemberController(memberService, memberView, adminView,
+                                                            performanceController, bookingController, perfSeatController, venueController, seatController, seatView);
+        memberController.setReviewController(reviewController); // 추가
+
+        // ⑥ 프로그램 시작 — 로그인 화면부터 시작
+        // 로그인 후 USER면 일반 메뉴, ADMIN이면 관리자 메뉴로 분기
+        memberController.start();
+    }
 }
-

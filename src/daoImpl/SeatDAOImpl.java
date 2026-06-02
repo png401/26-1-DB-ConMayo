@@ -1,17 +1,16 @@
 package daoImpl;
 
 import dao.SeatDAO;
+import db.DatabaseConnector;
 import dto.SeatDTO;
+
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public class SeatDAOImpl implements SeatDAO {
-    private final Connection conn;
 
-    public SeatDAOImpl(Connection conn) {
-        this.conn = conn;
-    }
+    // conn 필드 제거 — 매번 getConnection() 호출
 
     // [조회] 공연별 전체 좌석 목록 반환 (평점, 색상 포함)
     @Override
@@ -22,35 +21,33 @@ public class SeatDAOImpl implements SeatDAO {
         // GROUP BY: 한 좌석에 리뷰 여러 개일 수 있으므로 AVG 집계 위해 묶음
         String sql = """
                 SELECT s.seat_id,
-       s.venue_id,
-       ps.performance_seat_id,
-       s.section,
-       s.row_num,
-       s.col_num,
-       ps.price,
-       b.booking_status,
-       (
-           SELECT AVG(r2.seat_rating)
-           FROM review r2
-           JOIN booking b2 ON r2.booking_id = b2.booking_id
-           JOIN performance_seat ps2 ON b2.performance_seat_id = ps2.performance_seat_id
-           WHERE ps2.seat_id = s.seat_id
-        ) AS avg_rating
-        FROM performance_seat ps
-        JOIN seat s
-        ON ps.seat_id = s.seat_id
-        LEFT JOIN booking b
-        ON b.performance_seat_id = ps.performance_seat_id
-        AND b.booking_status IN ('BOOKED', 'HOLD')
-        WHERE ps.performance_id = ?
-        GROUP BY s.seat_id, s.venue_id, ps.performance_seat_id,
-         s.section, s.row_num, s.col_num, ps.price, b.booking_status
-        ORDER BY s.section, s.row_num, s.col_num
+                       s.venue_id,
+                       ps.performance_seat_id,
+                       s.section,
+                       s.row_num,
+                       s.col_num,
+                       ps.price,
+                       b.booking_status,
+                       (
+                           SELECT AVG(r2.seat_rating)
+                           FROM review r2
+                           JOIN booking b2 ON r2.booking_id = b2.booking_id
+                           JOIN performance_seat ps2 ON b2.performance_seat_id = ps2.performance_seat_id
+                           WHERE ps2.seat_id = s.seat_id
+                        ) AS avg_rating
+                        FROM performance_seat ps
+                        JOIN seat s ON ps.seat_id = s.seat_id
+                        LEFT JOIN booking b ON b.performance_seat_id = ps.performance_seat_id
+                        AND b.booking_status IN ('BOOKED', 'HOLD')
+                        WHERE ps.performance_id = ?
+                        GROUP BY s.seat_id, s.venue_id, ps.performance_seat_id,
+                         s.section, s.row_num, s.col_num, ps.price, b.booking_status
+                        ORDER BY s.section, s.row_num, s.col_num
                 """;
 
-        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        try (Connection conn = DatabaseConnector.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, performanceId);
-
             try (ResultSet rs = pstmt.executeQuery()) {
                 while (rs.next()) {
                     SeatDTO seat = new SeatDTO(
@@ -61,7 +58,6 @@ public class SeatDAOImpl implements SeatDAO {
                             rs.getInt("row_num"),
                             rs.getInt("col_num")
                     );
-
                     double avg = rs.getDouble("avg_rating");
                     // AVG 결과가 NULL(리뷰 없는 좌석)이면 wasNull()이 true -> 0.0 처리
                     seat.setAvgRating(rs.wasNull() ? 0.0 : avg);
@@ -69,7 +65,6 @@ public class SeatDAOImpl implements SeatDAO {
                     // booking LEFT JOIN에서 booking_status가 있으면 예매된 좌석
                     String bookingStatus = rs.getString("booking_status"); // 추가
                     seat.setBooked(bookingStatus != null); // 추가
-
                     list.add(seat);
                 }
             }
@@ -86,16 +81,14 @@ public class SeatDAOImpl implements SeatDAO {
         String sql = """
                 SELECT AVG(r.seat_rating) AS avg_rating
                 FROM review r
-                JOIN booking b
-                    ON b.booking_id = r.booking_id
-                JOIN performance_seat ps
-                    ON ps.performance_seat_id = b.performance_seat_id
+                JOIN booking b ON b.booking_id = r.booking_id
+                JOIN performance_seat ps ON ps.performance_seat_id = b.performance_seat_id
                 WHERE ps.seat_id = ?
                 """;
 
-        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        try (Connection conn = DatabaseConnector.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, seatId);
-
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
                     double avg = rs.getDouble("avg_rating");
@@ -123,9 +116,9 @@ public class SeatDAOImpl implements SeatDAO {
                   )
                 """;
 
-        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        try (Connection conn = DatabaseConnector.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, performanceId);
-
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
                     return rs.getInt("available_count");
