@@ -65,7 +65,7 @@ public class PerformanceDAOImpl implements PerformanceDAO {
                 list.add(mapRow(rs));
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+        	throw new RuntimeException("공연 목록 조회 실패: " + e.getMessage(), e);
         }
         return list;
     }
@@ -91,7 +91,7 @@ public class PerformanceDAOImpl implements PerformanceDAO {
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+        	throw new RuntimeException("카테고리별 공연 조회 실패: " + e.getMessage(), e);
         }
         return list;
     }
@@ -115,7 +115,7 @@ public class PerformanceDAOImpl implements PerformanceDAO {
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+        	throw new RuntimeException("공연 상세 조회 실패: " + e.getMessage(), e);
         }
         return null;
     }
@@ -139,7 +139,7 @@ public class PerformanceDAOImpl implements PerformanceDAO {
             pstmt.executeUpdate();
             System.out.println("공연 등록 성공: " + performance.getTitle());
         } catch (SQLException e) {
-            e.printStackTrace();
+        	throw new RuntimeException("DB 공연 등록 실패: " + e.getMessage(), e);
         }
     }
 
@@ -162,9 +162,11 @@ public class PerformanceDAOImpl implements PerformanceDAO {
             int rows = pstmt.executeUpdate();
             if (rows > 0) {
                 System.out.println("공연 정보 수정 성공 (ID: " + performance.getPerformanceId() + ")");
+            } else {
+                throw new RuntimeException("수정할 공연 정보가 존재하지 않습니다. (ID: " + performance.getPerformanceId() + ")");
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("DB 공연 수정 실패: " + e.getMessage(), e);
         }
     }
 
@@ -180,9 +182,11 @@ public class PerformanceDAOImpl implements PerformanceDAO {
             int rows = pstmt.executeUpdate();
             if (rows > 0) {
                 System.out.println("공연 삭제 성공 (ID: " + performanceId + ")");
+            } else {
+                throw new RuntimeException("삭제할 공연 정보가 존재하지 않습니다. (ID: " + performanceId + ")");
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("DB 공연 삭제 실패 (하위 예매 내역이나 좌석이 있는지 확인하세요): " + e.getMessage(), e);
         }
     }
 }

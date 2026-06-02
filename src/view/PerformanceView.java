@@ -20,7 +20,26 @@ public class PerformanceView {
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
     // 목록 화면용 포맷터 추가 (연-월-일만 깔끔하게 출력하기 위함)
     private final DateTimeFormatter listDateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-
+    
+    // [헬퍼 메서드] 숫자를 문자가 섞여도 안전하게 받아오는 기능 추가
+    private int inputSecureInteger(String message) {
+        while (true) {
+            System.out.print(message);
+            String input = sc.nextLine().trim();
+            try {
+                // 숫자가 아닌 모든 문자 제거 (예: "30분" -> "30", "4번" -> "4")
+                String numericOnly = input.replaceAll("[^0-9]", "");
+                if (numericOnly.isEmpty()) {
+                    System.out.println("⚠ 숫자만 입력할 수 있습니다. 다시 입력해주세요.");
+                    continue;
+                }
+                return Integer.parseInt(numericOnly);
+            } catch (NumberFormatException e) {
+                System.out.println("⚠ 올바른 형식의 숫자로 입력해주세요.");
+            }
+        }
+    }
+    
     // 1. 공연 목록 출력
     public void printList(List<PerformanceDTO> list) {
     	System.out.println("\n====== 공연 목록 ======");
@@ -99,34 +118,44 @@ public class PerformanceView {
         System.out.println();
         System.out.print("선택 > ");
 
-        int choice = sc.nextInt();
-        sc.nextLine();
-
-        return choice;
+        return inputSecureInteger("선택 > ");
     }
     
     // 4. 공연 ID 입력받기
     public int inputPerformanceId() { 
-        System.out.print("선택 > ");
-        int id = sc.nextInt();
-        sc.nextLine(); // 엔터 버퍼 비우기
-        return id;
+    	return inputSecureInteger("선택 > ");
     }
     
     // 5. 공연 정보 입력받기
     public PerformanceDTO inputPerformanceInfo() {
-    	System.out.println("\n=== 공연 등록 ==================");
+System.out.println("\n=== 공연 등록 ==================");
         
-        System.out.print("공연 제목 > ");
-        String title = sc.nextLine();
+        String title = "";
+        while (title.isEmpty()) {
+            System.out.print("공연 제목 > ");
+            title = sc.nextLine().trim();
+            if (title.isEmpty()) {
+                System.out.println("⚠ 공연 제목은 필수 입력 항목입니다. 공백 없이 입력해주세요.");
+            }
+        }
         
-        System.out.print("카테고리 > ");
-        String category = sc.nextLine();
+        String category = "";
+        while (category.isEmpty()) {
+            System.out.print("카테고리(뮤지컬/스포츠/콘서트) > ");
+            category = sc.nextLine().trim();
+            if (category.isEmpty()) {
+                System.out.println("⚠ 카테고리는 필수 입력 항목입니다. 공백 없이 입력해주세요.");
+            }
+        }
         
         LocalDateTime startTime = null;
         while (startTime == null) {
             System.out.print("공연 일시 (형식: 2026-07-01 19:00) > ");
-            String startStr = sc.nextLine();
+            String startStr = sc.nextLine().trim();
+            if (startStr.isEmpty()) {
+                System.out.println("⚠ 공연 일시를 입력해주세요.");
+                continue;
+            }
             try {
                 startTime = LocalDateTime.parse(startStr, formatter);
             } catch (DateTimeParseException e) {
@@ -134,24 +163,33 @@ public class PerformanceView {
             }
         }
         
-        System.out.print("러닝타임(분) > ");
-        int runningTime = sc.nextInt();
-        sc.nextLine();//이것만 추가
+        int runningTime = inputSecureInteger("러닝타임(분) > ");
         
+        //[수정] 예매 오픈일 입력 (공연 일시와 비교하는 로직 추가)
         LocalDateTime bookingOpen = null;
         while (bookingOpen == null) {
             System.out.print("예매 오픈일 (형식: 2026-05-01 10:00) > ");
-            String openStr = sc.nextLine();
+            String openStr = sc.nextLine().trim();
             try {
-                bookingOpen = LocalDateTime.parse(openStr, formatter);
+                LocalDateTime tempOpen = LocalDateTime.parse(openStr, formatter);
+                
+                // 핵심 검증: 예매 오픈일은 반드시 공연 일시보다 앞서야 함!
+                // 즉, 예매 오픈일이 공연 일시와 같거나 그 이후(isAfter)라면 에러를 뿜어야 합니다.
+                if (tempOpen.isAfter(startTime) || tempOpen.isEqual(startTime)) {
+                    System.out.println("⚠ 예매 오픈일은 공연 일시보다 무조건 빨라야 합니다.");
+                    System.out.println("(입력하신 공연 일시: " + startTime.format(formatter) + ")");
+                    continue; // 다시 예매 오픈일을 입력받도록 루프 처음으로 이동
+                }
+                
+                // 검증을 통과하면 실제 변수에 할당하여 루프 탈출
+                bookingOpen = tempOpen;
+                
             } catch (DateTimeParseException e) {
                 System.out.println("⚠ 날짜 형식이 올바르지 않습니다. 다시 입력해주세요.");
             }
         }
         
-        System.out.print("공연장 ID > ");
-        int venueId = sc.nextInt();
-        sc.nextLine(); // 엔터 버퍼 비우기
+        int venueId = inputSecureInteger("공연장 ID > ");
         
         SalesStatus salesStatus = null;
         while (salesStatus == null) {

@@ -109,16 +109,46 @@ public class PerformanceController {
 
     // 4. 공연 등록 (관리자)
     public void add() {
-        if (adminView == null) return;
-        PerformanceDTO newPerformance = performanceView.inputPerformanceInfo();
-        performanceService.addPerformance(newPerformance);
-        adminView.printSuccess("공연 등록 성공");
-        printListForAdmin();
+    	if (adminView == null) return;
+        try {
+            PerformanceDTO newPerformance = performanceView.inputPerformanceInfo();
+            
+            // 1. 기본적인 입력값 검증 (Validation)
+            if (newPerformance.getTitle() == null || newPerformance.getTitle().isBlank()) {
+                adminView.printError("공연 제목은 필수 입력 항목입니다.");
+                return;
+            }
+            if (newPerformance.getVenueId() <= 0) {
+                adminView.printError("올바른 공연장 번호(Venue ID)를 입력해주세요.");
+                return;
+            }
+            
+            // 2. 서비스 호출 (이 과정에서 DB 외래키 에러 발생 가능)
+            performanceService.addPerformance(newPerformance);
+            
+            // 3. 성공 시에만 출력 (예외가 던져지면 이 아래 코드는 실행되지 않음)
+            adminView.printSuccess("공연 등록 성공");
+            printListForAdmin();
+
+        } catch (java.time.format.DateTimeParseException e) {
+            adminView.printError("날짜/시간 형식이 올바르지 않습니다. (올바른 형식: yyyy-MM-dd HH:mm)");
+            // return; // 메서드 끝이므로 생략 가능하지만 명시적으로 흐름 끊기
+        } catch (RuntimeException e) {
+            // DAOImpl에서 던진 예외 중 외래키나 제약조건 위반 검사
+            String errorMsg = e.getMessage();
+            if (errorMsg != null && errorMsg.contains("foreign key constraint fails")) {
+                adminView.printError("공연 등록 실패: 존재하지 않는 공연장 번호(Venue ID)입니다. 등록된 공연장 번호를 확인해주세요.");
+            } else {
+                adminView.printError("공연 등록 중 오류가 발생했습니다: " + errorMsg);
+            }
+        } catch (Exception e) {
+            adminView.printError("알 수 없는 오류가 발생했습니다.");
+        }
     }
 
     // 5. 공연 수정 (관리자)
     public void modify() {
-        if (adminView == null) return;
+    	if (adminView == null) return;
         int performanceId = adminView.inputPerformanceId();
 
         PerformanceDTO existingPerf = performanceService.getPerformance(performanceId);
@@ -129,7 +159,7 @@ public class PerformanceController {
 
         System.out.println("\n[현재 등록된 공연 정보]");
         System.out.println("- 제목 : " + existingPerf.getTitle());
-        System.out.println("- 카테고리: " + existingPerf.getCategory());
+        System.out.println("- 카테고리(뮤지컬/스포츠/콘서트): " + existingPerf.getCategory());
         if (existingPerf.getStartTime() != null) {
             System.out.println("- 일시 : " + existingPerf.getStartTime()
                     .format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
@@ -142,17 +172,33 @@ public class PerformanceController {
 
         PerformanceDTO updatedPerformance = performanceView.inputPerformanceInfo();
         updatedPerformance.setPerformanceId(performanceId);
-        performanceService.modifyPerformance(updatedPerformance);
-        adminView.printSuccess("공연 수정 성공");
-        printListForAdmin();
+        
+        try {
+            performanceService.modifyPerformance(updatedPerformance);
+            adminView.printSuccess("공연 수정 성공");
+            printListForAdmin();
+        } catch (Exception e) {
+            System.out.println("\n[오류] 공연 수정에 실패했습니다.");
+            if (e.getMessage() != null && e.getMessage().contains("foreign key constraint fails")) {
+                System.out.println("⚠ 원인: 입력하신 '공연장 ID'가 잘못되었습니다. 존재하는 ID인지 확인하세요.");
+            } else {
+                System.out.println("⚠ 에러 원인: " + e.getMessage());
+            }
+        }
     }
 
     // 6. 공연 삭제 (관리자)
     public void remove() {
-        if (adminView == null) return;
+    	if (adminView == null) return;
         int performanceId = adminView.inputPerformanceId();
-        performanceService.removePerformance(performanceId);
-        adminView.printSuccess("공연이 성공적으로 삭제되었습니다.");
-        printListForAdmin();
+        
+        try {
+            performanceService.removePerformance(performanceId);
+            adminView.printSuccess("공연이 성공적으로 삭제되었습니다.");
+            printListForAdmin();
+        } catch (Exception e) {
+            System.out.println("\n[오류] 공연 삭제에 실패했습니다.");
+            System.out.println("⚠ 에러 원인: " + e.getMessage());
+        }
     }
 }
