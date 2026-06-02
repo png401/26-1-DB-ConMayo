@@ -60,8 +60,7 @@ public class PerformanceService {
     public void removePerformance(int performanceId) { 
         PerformanceDTO exist = performanceDAO.findById(performanceId);
         if (exist == null) {
-            System.out.println("오류: 삭제하려는 공연이 존재하지 않습니다.");
-            return;
+        	throw new IllegalArgumentException("삭제하려는 공연이 존재하지 않습니다.");
         }
         performanceDAO.delete(performanceId);
     }

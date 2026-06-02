@@ -54,19 +54,34 @@ public class MemberService {
     }   
     
     
-    public void addToBlacklist(String memberId) {
+    public boolean addToBlacklist(String memberId) {
     	// 블랙리스트 등록 (7일)
     	
-    	LocalDateTime blacklistUntil =
-                LocalDateTime.now().plusDays(7);
+    	MemberDTO member = memberDAO.findById(memberId);
+        if (member == null) {
+            return false; // 존재하지 않는 회원인 경우 false 반환
+        }
 
+        LocalDateTime blacklistUntil = LocalDateTime.now().plusDays(7);
         memberDAO.setBlacklist(memberId, blacklistUntil);
+        return true; // 등록 성공 시 true 반환
     }
     
-    public boolean releaseBlacklist(String memberId) {
+    public int releaseBlacklist(String memberId) {
         // 블랙리스트 해제
 
-    	return memberDAO.releaseBlacklist(memberId);
+    	MemberDTO member = memberDAO.findById(memberId);
+    	
+    	if (member == null) {
+    		return 1;
+    	}
+    	
+    	if (!isBlacklisted(member)) {
+    		return 2;
+    	}
+    	
+    	memberDAO.releaseBlacklist(memberId);
+    	return 0;
     }
     
 }
