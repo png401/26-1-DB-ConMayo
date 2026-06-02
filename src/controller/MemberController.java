@@ -297,8 +297,14 @@ public class MemberController {
     public void addBlacklist() {
 
         String memberId = adminView.inputMemberIdToBlacklist();
-        memberService.addToBlacklist(memberId);
-        adminView.printSuccess("블랙리스트 등록이 완료되었습니다.");
+
+        boolean success = memberService.addToBlacklist(memberId);
+        
+        if (success) {
+            adminView.printSuccess("블랙리스트 등록이 완료되었습니다.");
+        } else {
+            adminView.printError("존재하지 않는 회원 ID입니다.");
+        }
     }
 
     // 블랙리스트 해제
@@ -306,12 +312,14 @@ public class MemberController {
 
         String memberId = adminView.inputMemberIdToBlacklist();
 
-        boolean success = memberService.releaseBlacklist(memberId);
+        int result = memberService.releaseBlacklist(memberId);
 
-        if (success) {
+        if (result == 0) {
             adminView.printSuccess("블랙리스트가 해제되었습니다.");
-        } else {
+        } else if (result == 1) {
             adminView.printError("존재하지 않는 회원 ID입니다.");
+        } else if (result == 2) {
+            adminView.printError("블랙리스트 회원이 아닙니다.");
         }
     }
 }
