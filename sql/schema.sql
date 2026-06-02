@@ -40,6 +40,7 @@ CREATE TABLE IF NOT EXISTS performance (
 	booking_open DATETIME NOT NULL,
 	venue_id INT NOT NULL,
 	FOREIGN KEY(venue_id) REFERENCES venue(venue_id)
+		ON DELETE CASCADE -- 해당 공연장 삭제되면 공연도 삭제  
 	);
 	
 
@@ -50,7 +51,8 @@ CREATE TABLE IF NOT EXISTS seat (
 	section VARCHAR(10) NOT NULL,
 	row_num INT NOT NULL CHECK (row_num >= 1),
 	col_num INT NOT NULL CHECK (col_num >= 1),
-	FOREIGN KEY(venue_id) REFERENCES venue(venue_id),
+	FOREIGN KEY(venue_id) REFERENCES venue(venue_id)
+		ON DELETE CASCADE, -- 해당 공연장 삭제되면 좌석도 삭제
 	UNIQUE (venue_id, section, row_num, col_num)
 	);
 	
@@ -61,8 +63,10 @@ CREATE TABLE IF NOT EXISTS performance_seat (
 	performance_id INT NOT NULL,
 	seat_id INT NOT NULL,
 	price INT NOT NULL,
-	FOREIGN KEY(performance_id) REFERENCES performance(performance_id),
-	FOREIGN KEY(seat_id) REFERENCES seat(seat_id),
+	FOREIGN KEY(performance_id) REFERENCES performance(performance_id) 
+		ON DELETE CASCADE, -- 해당 공연 삭제되면 공연좌석도 삭제
+	FOREIGN KEY(seat_id) REFERENCES seat(seat_id) 
+		ON DELETE CASCADE, -- 해당 좌석 삭제되면 공연좌석도 삭제
 	UNIQUE (performance_id, seat_id)
 	);
 	
@@ -78,8 +82,9 @@ CREATE TABLE IF NOT EXISTS booking (
 	booked_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	payment INT,
 	FOREIGN KEY (member_id) REFERENCES member(member_id) 
-		ON DELETE CASCADE, -- 해당 회원 삭제되면 예매도 삭제되도록 
+		ON DELETE CASCADE, -- 해당 회원 삭제되면 예매도 삭제
 	FOREIGN KEY(performance_seat_id) REFERENCES performance_seat(performance_seat_id)
+		ON DELETE CASCADE -- 해당 공연좌석 삭제되면 예매도 삭제
 	);
 	
 	
@@ -92,7 +97,8 @@ CREATE TABLE IF NOT EXISTS review (
 		),
 	written_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	content TEXT,
-	FOREIGN KEY(booking_id) REFERENCES booking(booking_id)
+	FOREIGN KEY(booking_id) REFERENCES booking(booking_id) 
+		ON DELETE CASCADE -- 해당 예매 삭제되면 리뷰도 삭제
 	);
 	
 
@@ -106,6 +112,7 @@ CREATE TABLE IF NOT EXISTS cancellation (
 		'REQUESTED', 'PENDING_REFUND', 'REFUNDED'
 		) NOT NULL DEFAULT 'REQUESTED',
 	FOREIGN KEY(booking_id) REFERENCES booking(booking_id)
+		ON DELETE CASCADE
 	);
 	
 	
