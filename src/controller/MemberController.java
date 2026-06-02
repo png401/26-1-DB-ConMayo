@@ -6,6 +6,7 @@ import view.AdminView;
 import view.MemberView;
 
 import java.sql.SQLException;
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
@@ -265,19 +266,29 @@ public class MemberController {
         String memberId = memberView.inputId();
 
         try {
+
             if (memberService.isDuplicatedId(memberId)) {
                 memberView.printError("중복된 아이디입니다.");
                 return;
             }
+
+            String passwd = memberView.inputPassword();
+
+            MemberDTO member = memberView.inputMemberInfo();
+
+            memberService.register(memberId, passwd, member);
+
+            memberView.printSuccess("회원가입이 완료되었습니다.");
+
+        } catch (SQLIntegrityConstraintViolationException e) {
+
+            memberView.printError("이미 사용 중인 전화번호입니다.");
+
         } catch (SQLException e) {
+
+            memberView.printError("회원가입 중 오류가 발생했습니다.");
             e.printStackTrace();
         }
-
-        String passwd = memberView.inputPassword();
-
-        MemberDTO member = memberView.inputMemberInfo();
-        memberService.register(memberId, passwd, member);
-        memberView.printSuccess("회원가입이 완료되었습니다.");
     }
 
     // 현재 블랙리스트 출력

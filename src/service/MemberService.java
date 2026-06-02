@@ -21,7 +21,7 @@ public class MemberService {
     }
     
     
-    public void register(String id, String pw, MemberDTO member) {
+    public void register(String id, String pw, MemberDTO member) throws SQLException {
     	// 회원가입
     	member.setMemberRole(MemberRole.USER);
     	member.setMemberId(id);

@@ -103,7 +103,7 @@ public class MemberDAOImpl implements MemberDAO {
 
 
     @Override
-    public void insert(MemberDTO member) {
+    public void insert(MemberDTO member) throws SQLException {
         // 회원가입 시 호출
         String sql = "INSERT INTO member " +
                 "(member_id, passwd, member_name, phone, member_role) " +
@@ -119,9 +119,7 @@ public class MemberDAOImpl implements MemberDAO {
             stmt.setString(5, member.getMemberRole().name());
             stmt.executeUpdate();
 
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        } 
     }
 
 
