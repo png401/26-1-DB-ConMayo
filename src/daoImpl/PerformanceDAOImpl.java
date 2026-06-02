@@ -1,6 +1,7 @@
 package daoImpl;
 
 import dao.PerformanceDAO;
+import db.DatabaseConnector;
 import dto.PerformanceDTO;
 import dto.SalesStatus;
 
@@ -13,11 +14,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class PerformanceDAOImpl implements PerformanceDAO {
-    private final Connection conn;
 
-    public PerformanceDAOImpl(Connection conn) {
-        this.conn = conn;
-    }
+    // conn 필드 제거 — 매번 getConnection() 호출
 
     // 공통 SQL — venue JOIN으로 venue_name, remaining_seats 함께 조회
     private static final String BASE_SQL = """
@@ -35,16 +33,16 @@ public class PerformanceDAOImpl implements PerformanceDAO {
     // ResultSet → PerformanceDTO 변환 (공통 매핑 메서드)
     private PerformanceDTO mapRow(ResultSet rs) throws SQLException {
         PerformanceDTO performance = new PerformanceDTO(
-            rs.getInt("performance_id"),
-            rs.getString("title"),
-            rs.getString("category"),
-            rs.getTimestamp("start_time").toLocalDateTime(),
-            rs.getInt("running_time"),
-            SalesStatus.valueOf(rs.getString("sales_status")),
-            rs.getTimestamp("booking_open").toLocalDateTime(),
-            rs.getInt("venue_id")
+                rs.getInt("performance_id"),
+                rs.getString("title"),
+                rs.getString("category"),
+                rs.getTimestamp("start_time").toLocalDateTime(),
+                rs.getInt("running_time"),
+                SalesStatus.valueOf(rs.getString("sales_status")),
+                rs.getTimestamp("booking_open").toLocalDateTime(),
+                rs.getInt("venue_id")
         );
-        performance.setVenueName(rs.getString("venue_name"));       // 공연장 이름 세팅
+        performance.setVenueName(rs.getString("venue_name"));        // 공연장 이름 세팅
         performance.setRemainingSeats(rs.getInt("remaining_seats")); // 잔여석 세팅
         return performance;
     }
@@ -60,7 +58,8 @@ public class PerformanceDAOImpl implements PerformanceDAO {
                 ORDER BY p.performance_id
                 """;
 
-        try (PreparedStatement pstmt = conn.prepareStatement(sql);
+        try (Connection conn = DatabaseConnector.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql);
              ResultSet rs = pstmt.executeQuery()) {
             while (rs.next()) {
                 list.add(mapRow(rs));
@@ -83,7 +82,8 @@ public class PerformanceDAOImpl implements PerformanceDAO {
                 ORDER BY p.performance_id
                 """;
 
-        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        try (Connection conn = DatabaseConnector.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, category);
             try (ResultSet rs = pstmt.executeQuery()) {
                 while (rs.next()) {
@@ -106,7 +106,8 @@ public class PerformanceDAOImpl implements PerformanceDAO {
                          p.sales_status, p.booking_open, p.venue_id, v.venue_name
                 """;
 
-        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        try (Connection conn = DatabaseConnector.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, performanceId);
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
@@ -124,9 +125,10 @@ public class PerformanceDAOImpl implements PerformanceDAO {
         // INSERT INTO performance (title, category, start_time, running_time,
         //   sales_status, booking_open, venue_id) VALUES (?,?,?,?,?,?,?)
         String sql = "INSERT INTO performance (title, category, start_time, running_time, sales_status, booking_open, venue_id) " +
-                     "VALUES (?, ?, ?, ?, ?, ?, ?)";
+                "VALUES (?, ?, ?, ?, ?, ?, ?)";
 
-        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        try (Connection conn = DatabaseConnector.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, performance.getTitle());
             pstmt.setString(2, performance.getCategory());
             pstmt.setTimestamp(3, Timestamp.valueOf(performance.getStartTime()));
@@ -145,9 +147,10 @@ public class PerformanceDAOImpl implements PerformanceDAO {
     public void update(PerformanceDTO performance) {
         // UPDATE performance SET title=?, category=?, ... WHERE performance_id=?
         String sql = "UPDATE performance SET title = ?, category = ?, start_time = ?, running_time = ?, " +
-                     "sales_status = ?, booking_open = ?, venue_id = ? WHERE performance_id = ?";
+                "sales_status = ?, booking_open = ?, venue_id = ? WHERE performance_id = ?";
 
-        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        try (Connection conn = DatabaseConnector.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, performance.getTitle());
             pstmt.setString(2, performance.getCategory());
             pstmt.setTimestamp(3, Timestamp.valueOf(performance.getStartTime()));
@@ -171,7 +174,8 @@ public class PerformanceDAOImpl implements PerformanceDAO {
         // → 연결된 performance_seat, booking이 있으면 FK로 막힘
         String sql = "DELETE FROM performance WHERE performance_id = ?";
 
-        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        try (Connection conn = DatabaseConnector.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, performanceId);
             int rows = pstmt.executeUpdate();
             if (rows > 0) {

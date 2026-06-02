@@ -192,8 +192,20 @@ public class SeatPanel extends JDialog {
                 JOptionPane.showMessageDialog(this, "좌석을 먼저 선택해주세요.");
                 return;
             }
-            bookingController.book(memberId, selectedSeat.getPerformanceSeatId(), selectedSeat.getPrice());
-            dispose();
+
+            try {
+                bookingController.book(memberId, selectedSeat.getPerformanceSeatId(), selectedSeat.getPrice());
+                JOptionPane.showMessageDialog(this, "✓ 예매가 완료되었습니다!");
+                dispose(); // 성공했을 때만 창 닫기
+            } catch (RuntimeException ex) {
+                JOptionPane.showMessageDialog(this,
+                    "예매 실패: " + ex.getMessage(),
+                    "예매 오류",
+                    JOptionPane.ERROR_MESSAGE);
+                // 좌석 선택 초기화
+                selectedSeat = null;
+                selectedInfoLabel.setText("좌석을 선택해주세요.");
+            }
         });
 
         JButton backBtn = new JButton("뒤로가기");

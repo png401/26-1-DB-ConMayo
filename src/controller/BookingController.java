@@ -32,12 +32,8 @@ public class BookingController {
         booking.setPerformanceSeatId(performanceSeatId);
         booking.setBookingStatus(BookingStatus.HOLD);
         booking.setPayment(payment);
-        try {
-            bookingService.book(booking);
-            bookingView.printSuccess("예매가 완료되었습니다! 예매ID: " + booking.getBookingId());
-        } catch (Exception e) {
-            bookingView.printError("예매 실패: " + e.getMessage());
-        }
+        // 예외를 위로 던져서 SeatPanel에서 처리
+        bookingService.book(booking);
     }
 
     public void showMyBookings(String memberId, ReviewController reviewController) {//파라미터 추가 

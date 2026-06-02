@@ -1,23 +1,21 @@
 package daoImpl;
 
 import dao.ReviewDAO;
+import db.DatabaseConnector;
 import dto.ReviewDTO;
+
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public class ReviewDAOImpl implements ReviewDAO {
-    private final Connection conn;
 
-    public ReviewDAOImpl(Connection conn) {
-        this.conn = conn;
-    }
+    // conn 필드 제거 — 매번 getConnection() 호출
 
     // [조회] 특정 좌석의 리뷰 목록 반환 (최신순)
     @Override
     public List<ReviewDTO> findBySeatId(int seatId) {
         List<ReviewDTO> list = new ArrayList<>(); // 메서드 안 맨 위에 선언
-
         // review에 seat_id가 없으므로 booking -> performance_seat 경유해서 조회
         // review → booking -> performance_seat -> seat_id 순으로 JOIN
         String sql = """
@@ -27,17 +25,15 @@ public class ReviewDAOImpl implements ReviewDAO {
                        r.written_at,
                        r.content
                 FROM review r
-                JOIN booking b
-                    ON r.booking_id = b.booking_id
-                JOIN performance_seat ps
-                    ON b.performance_seat_id = ps.performance_seat_id
+                JOIN booking b ON r.booking_id = b.booking_id
+                JOIN performance_seat ps ON b.performance_seat_id = ps.performance_seat_id
                 WHERE ps.seat_id = ?
                 ORDER BY r.written_at DESC
                 """;
 
-        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        try (Connection conn = DatabaseConnector.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, seatId);
-
             try (ResultSet rs = pstmt.executeQuery()) {
                 while (rs.next()) {
                     list.add(new ReviewDTO(
@@ -65,13 +61,12 @@ public class ReviewDAOImpl implements ReviewDAO {
                 VALUES (?, ?, ?)
                 """;
 
-        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        try (Connection conn = DatabaseConnector.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, review.getBookingId());
             pstmt.setInt(2, review.getSeatRating());
             pstmt.setString(3, review.getContent());
-
             return pstmt.executeUpdate() > 0;
-
         } catch (SQLException e) {
             System.out.println("리뷰 등록 실패: " + e.getMessage());
             return false;
@@ -88,9 +83,9 @@ public class ReviewDAOImpl implements ReviewDAO {
                 WHERE booking_id = ?
                 """;
 
-        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        try (Connection conn = DatabaseConnector.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, bookingId);
-
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
                     return rs.getInt(1) > 0;

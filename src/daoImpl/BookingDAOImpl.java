@@ -1,6 +1,7 @@
 package daoImpl;
 
 import dao.BookingDAO;
+import db.DatabaseConnector;
 import dto.BookingDTO;
 import dto.BookingStatus;
 
@@ -10,14 +11,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class BookingDAOImpl implements BookingDAO {
-    private final Connection conn;
 
-    public BookingDAOImpl(Connection conn) {
-        this.conn = conn;
-    }
+    // conn 필드 제거 — 트랜잭션용은 conn 직접 받고, 나머지는 매번 getConnection() 호출
+
+    // ===== 트랜잭션용 (conn 직접 받음) =====
 
     @Override
-    public void insert(BookingDTO booking) {
+    public void insert(Connection conn, BookingDTO booking) {
         String sql = "INSERT INTO booking (member_id, performance_seat_id, booking_status, payment) VALUES (?, ?, ?, ?)";
         try (PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             pstmt.setString(1, booking.getMemberId());
@@ -34,9 +34,49 @@ public class BookingDAOImpl implements BookingDAO {
     }
 
     @Override
+    public void updateStatus(Connection conn, int bookingId, String status) {
+        String sql = "UPDATE booking SET booking_status = ? WHERE booking_id = ?";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, status);
+            pstmt.setInt(2, bookingId);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException("예매 상태 변경 실패: " + e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public void lockSeat(Connection conn, int performanceSeatId) {
+        String sql = "SELECT * FROM performance_seat WHERE performance_seat_id = ? FOR UPDATE";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, performanceSeatId);
+            pstmt.executeQuery();
+        } catch (SQLException e) {
+            throw new RuntimeException("좌석 락 실패: " + e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public boolean isAlreadyBooked(Connection conn, int performanceSeatId) {
+        String sql = "SELECT COUNT(*) FROM booking WHERE performance_seat_id = ? AND booking_status IN ('BOOKED', 'HOLD')";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, performanceSeatId);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) return rs.getInt(1) > 0;
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("예매 중복 확인 실패: " + e.getMessage(), e);
+        }
+        return false;
+    }
+
+    // ===== 트랜잭션 밖 (매번 getConnection()) =====
+
+    @Override
     public BookingDTO findById(int bookingId) {
         String sql = "SELECT * FROM booking WHERE booking_id = ?";
-        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        try (Connection conn = DatabaseConnector.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, bookingId);
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) return mapRow(rs);
@@ -50,14 +90,15 @@ public class BookingDAOImpl implements BookingDAO {
     @Override
     public List<BookingDTO> findByMemberId(String memberId) {
         String sql = "SELECT * "
-        		+ "FROM booking b "
-        		+ "JOIN performance_seat ps "
-        		+ "ON b.performance_seat_id = ps.performance_seat_id "
-        		+ "JOIN performance p "
-        		+ "ON p.performance_id = ps.performance_id "
-        		+ "WHERE member_id = ? ORDER BY booked_at DESC ";
+                + "FROM booking b "
+                + "JOIN performance_seat ps "
+                + "ON b.performance_seat_id = ps.performance_seat_id "
+                + "JOIN performance p "
+                + "ON p.performance_id = ps.performance_id "
+                + "WHERE member_id = ? ORDER BY booked_at DESC ";
         List<BookingDTO> list = new ArrayList<>();
-        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        try (Connection conn = DatabaseConnector.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, memberId);
             try (ResultSet rs = pstmt.executeQuery()) {
                 while (rs.next()) list.add(mapRow(rs));
@@ -69,18 +110,6 @@ public class BookingDAOImpl implements BookingDAO {
     }
 
     @Override
-    public void updateStatus(int bookingId, String status) {
-        String sql = "UPDATE booking SET booking_status = ? WHERE booking_id = ?";
-        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setString(1, status);
-            pstmt.setInt(2, bookingId);
-            pstmt.executeUpdate();
-        } catch (SQLException e) {
-            throw new RuntimeException("예매 상태 변경 실패: " + e.getMessage(), e);
-        }
-    }
-
-    @Override
     public int getAvailableCount(int performanceId) {
         String sql = "SELECT " +
                      "  (SELECT COUNT(*) FROM performance_seat WHERE performance_id = ?) " +
@@ -88,7 +117,8 @@ public class BookingDAOImpl implements BookingDAO {
                      "   JOIN performance_seat ps ON b.performance_seat_id = ps.performance_seat_id " +
                      "   WHERE ps.performance_id = ? AND b.booking_status IN ('HOLD', 'BOOKED')) " +
                      "AS available_count";
-        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        try (Connection conn = DatabaseConnector.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, performanceId);
             pstmt.setInt(2, performanceId);
             try (ResultSet rs = pstmt.executeQuery()) {
@@ -100,21 +130,6 @@ public class BookingDAOImpl implements BookingDAO {
         return 0;
     }
 
-    private BookingDTO mapRow(ResultSet rs) throws SQLException {
-        BookingDTO dto = new BookingDTO();
-        dto.setBookingId(rs.getInt("booking_id"));
-        dto.setMemberId(rs.getString("member_id"));
-        dto.setPerformanceSeatId(rs.getInt("performance_seat_id"));
-        dto.setBookingStatus(BookingStatus.valueOf(rs.getString("booking_status")));
-        Timestamp ts = rs.getTimestamp("booked_at");
-        if (ts != null) dto.setBookedAt(ts.toLocalDateTime());
-        dto.setPayment(rs.getInt("payment"));
-        
-        try { dto.setPerformanceTitle(rs.getString("title")); } catch (SQLException ignored) {}
-        
-        return dto;
-    }
-
     @Override
     public LocalDateTime getPerformanceStartTime(int bookingId) {
         String sql = "SELECT p.start_time " +
@@ -122,7 +137,8 @@ public class BookingDAOImpl implements BookingDAO {
                     "JOIN performance_seat ps ON b.performance_seat_id = ps.performance_seat_id " +
                     "JOIN performance p ON ps.performance_id = p.performance_id " +
                     "WHERE b.booking_id = ?";
-        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        try (Connection conn = DatabaseConnector.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, bookingId);
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
@@ -135,29 +151,17 @@ public class BookingDAOImpl implements BookingDAO {
         }
         return null;
     }
-    
-    @Override
-    public void lockSeat(int performanceSeatId) {
-        String sql = "SELECT * FROM performance_seat WHERE performance_seat_id = ? FOR UPDATE";
-        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setInt(1, performanceSeatId);
-            pstmt.executeQuery();
-        } catch (SQLException e) {
-            throw new RuntimeException("좌석 락 실패: " + e.getMessage(), e);
-        }
-    }
 
-    @Override
-    public boolean isAlreadyBooked(int performanceSeatId) {
-        String sql = "SELECT COUNT(*) FROM booking WHERE performance_seat_id = ? AND booking_status IN ('BOOKED', 'HOLD')";
-        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setInt(1, performanceSeatId);
-            try (ResultSet rs = pstmt.executeQuery()) {
-                if (rs.next()) return rs.getInt(1) > 0;
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException("예매 중복 확인 실패: " + e.getMessage(), e);
-        }
-        return false;
+    private BookingDTO mapRow(ResultSet rs) throws SQLException {
+        BookingDTO dto = new BookingDTO();
+        dto.setBookingId(rs.getInt("booking_id"));
+        dto.setMemberId(rs.getString("member_id"));
+        dto.setPerformanceSeatId(rs.getInt("performance_seat_id"));
+        dto.setBookingStatus(BookingStatus.valueOf(rs.getString("booking_status")));
+        Timestamp ts = rs.getTimestamp("booked_at");
+        if (ts != null) dto.setBookedAt(ts.toLocalDateTime());
+        dto.setPayment(rs.getInt("payment"));
+        try { dto.setPerformanceTitle(rs.getString("title")); } catch (SQLException ignored) {}
+        return dto;
     }
 }

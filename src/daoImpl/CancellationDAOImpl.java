@@ -1,20 +1,20 @@
 package daoImpl;
 
 import dao.CancellationDAO;
+import db.DatabaseConnector;
 import dto.CancellationDTO;
 import dto.CancelStatus;
 
 import java.sql.*;
 
 public class CancellationDAOImpl implements CancellationDAO {
-    private final Connection conn;
 
-    public CancellationDAOImpl(Connection conn) {
-        this.conn = conn;
-    }
+    // conn 필드 제거 — 트랜잭션용은 conn 직접 받고, 나머지는 매번 getConnection() 호출
+
+    // ===== 트랜잭션용 (conn 직접 받음) =====
 
     @Override
-    public void insert(CancellationDTO cancellation) {
+    public void insert(Connection conn, CancellationDTO cancellation) {
         String sql = "INSERT INTO cancellation (booking_id, refund_amount, cancellation_fee, cancel_status) VALUES (?, ?, ?, ?)";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, cancellation.getBookingId());
@@ -27,10 +27,13 @@ public class CancellationDAOImpl implements CancellationDAO {
         }
     }
 
+    // ===== 트랜잭션 밖 (매번 getConnection()) =====
+
     @Override
     public CancellationDTO findByBookingId(int bookingId) {
         String sql = "SELECT * FROM cancellation WHERE booking_id = ?";
-        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        try (Connection conn = DatabaseConnector.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, bookingId);
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) return mapRow(rs);
@@ -43,8 +46,10 @@ public class CancellationDAOImpl implements CancellationDAO {
 
     @Override
     public void updateStatus(int bookingId, String status) {
+        // 취소 상태 변경 (REQUESTED→PENDING_REFUND→REFUNDED)
         String sql = "UPDATE cancellation SET cancel_status = ? WHERE booking_id = ?";
-        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        try (Connection conn = DatabaseConnector.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, status);
             pstmt.setInt(2, bookingId);
             pstmt.executeUpdate();
