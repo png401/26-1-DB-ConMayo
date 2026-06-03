@@ -76,10 +76,17 @@ public class PerformanceService {
         else if (perf.getBookingOpen() != null && perf.getBookingOpen().isAfter(now)) {
             perf.setSalesStatus(SalesStatus.COMING_SOON);
         }
-        // 3. 그 외의 경우 중 매진(SOLD_OUT)이 아니라면 -> 예매중(OPEN) 상태 유지
-        else if (perf.getSalesStatus() != SalesStatus.SOLD_OUT) {
+        // 3. 그 외의 경우 (현재 예매 기간일 때)
+        else {
+        	if (perf.getRemainingSeats() <=0 ) {
+        		perf.setSalesStatus(SalesStatus.SOLD_OUT);
+        	}
+        	// 매진(SOLD_OUT)이 아니라면 -> 예매중(OPEN) 상태 유지
+        	else if (perf.getSalesStatus() != SalesStatus.SOLD_OUT) {
             perf.setSalesStatus(SalesStatus.OPEN);
+        	}
         }
+        
     }
     
     // 공연 이름 검색어 찾기
