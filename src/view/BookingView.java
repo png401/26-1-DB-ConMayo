@@ -38,11 +38,11 @@ public class BookingView {
         catch (NumberFormatException e) { return -1; }
     }
 
-    public int inputBookingIndex(int max) {
-        System.out.print("공연 번호 선택 또는 0. 뒤로\n선택 > ");
+    public int inputBookingIndex() {
+        System.out.println("공연 번호 선택 또는 0. 뒤로");
+        System.out.print("선택 > ");
         try {
-            int input = Integer.parseInt(sc.nextLine().trim());
-            return (input >= 0 && input <= max) ? input : -1;
+            return Integer.parseInt(sc.nextLine().trim());
         } catch (NumberFormatException e) { return -1; }
     }
 
@@ -57,7 +57,7 @@ public class BookingView {
     }
 
     public void printError(String msg) {
-        System.out.println("[오류] " + msg);
+        System.out.println("⚠ " + msg);
     }
 
     private String statusLabel(BookingStatus status) {
