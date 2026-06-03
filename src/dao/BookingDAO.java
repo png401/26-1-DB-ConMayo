@@ -13,4 +13,5 @@ public interface BookingDAO {
     LocalDateTime getPerformanceStartTime(int bookingId);                    // 추가 - 예매 ID로 공연 시작 시간 조회
     void lockSeat(Connection conn, int performanceSeatId);                   // FOR UPDATE 락 — 트랜잭션용
     boolean isAlreadyBooked(Connection conn, int performanceSeatId);         // 트랜잭션용
+	boolean isMemberBlacklisted(int bookingId);
 }

@@ -74,8 +74,12 @@ public class MemberController {
                     break;
 
                 case 2:
-                    bookingController.showMyBookings(
-                            loginMember.getMemberId(), reviewController); // reviewController 추가
+                	boolean isBlacklisted = bookingController.showMyBookings(
+                            loginMember.getMemberId(), reviewController);
+                	
+                	if (isBlacklisted) {
+                		return;
+                	}
                     break;
 
                 case 0:

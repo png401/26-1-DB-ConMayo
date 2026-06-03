@@ -164,4 +164,25 @@ public class BookingDAOImpl implements BookingDAO {
         try { dto.setPerformanceTitle(rs.getString("title")); } catch (SQLException ignored) {}
         return dto;
     }
+
+	@Override
+	public boolean isMemberBlacklisted(int bookingId) {
+		String sql = "SELECT COUNT(*) FROM member m " +
+                "JOIN booking b ON m.member_id = b.member_id " +
+                "WHERE b.booking_id = ? AND m.blacklist_until > NOW()";
+                
+   try (Connection conn = DatabaseConnector.getConnection();
+        PreparedStatement stmt = conn.prepareStatement(sql)) {
+       
+       stmt.setInt(1, bookingId);
+       try (ResultSet rs = stmt.executeQuery()) {
+           if (rs.next()) {
+               return rs.getInt(1) > 0; // 블랙리스트 조건에 맞으면 true
+           }
+       }
+   } catch (SQLException e) {
+       e.printStackTrace();
+   }
+		return false;
+	}
 }
