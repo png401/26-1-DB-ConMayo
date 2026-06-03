@@ -8,6 +8,7 @@ import service.CancellationService;
 import view.BookingView;
 import view.CancellationView;
 import controller.ReviewController;
+import db.DatabaseConnector;
 
 import java.util.List;
 
@@ -36,52 +37,66 @@ public class BookingController {
         bookingService.book(booking);
     }
 
-    public void showMyBookings(String memberId, ReviewController reviewController) {//파라미터 추가 
+    public boolean showMyBookings(String memberId, ReviewController reviewController) { 
         List<BookingDTO> list = bookingService.getMyBookings(memberId);
         bookingView.printMyBookings(list);
 
-        if (list.isEmpty()) return;
+        if (list.isEmpty()) return false;
 
         int index = -1;
         while(true) {
-        	index = bookingView.inputBookingIndex();
-        	if (index == 0) return;
-        	if (index >= 1 && index <= list.size()) break;
-        	
-        	bookingView.printError("존재하지 않는 예매 선택 번호입니다. 다시 확인해 주세요.");
-        	System.out.println();
+            index = bookingView.inputBookingIndex();
+            if (index == 0) return false;
+            if (index >= 1 && index <= list.size()) break;
+            
+            bookingView.printError("존재하지 않는 예매 선택 번호입니다. 다시 확인해 주세요.");
+            System.out.println();
         }
         
         BookingDTO selected = list.get(index - 1);
         int action = bookingView.inputAction();
-        	
+            
         switch (action) {
-        	case 1 -> handleCancel(selected);
-	        case 2 -> {
-	        	if(selected.getBookingStatus() != BookingStatus.BOOKED){
-	            	bookingView.printError("예매 완료 상태에서만 리뷰를 작성할 수 있습니다");
-	            } else {
-	            	reviewController.writeReview(selected.getBookingId());
-	            }
-	        }
-	        case 0 -> { }
-	        default -> bookingView.printError("올바른 번호를 입력해주세요.");
-        	
+            case 1 -> {
+                // handleCancel의 결과를 상위 MemberController로 토스하기 위해 return 문 배치
+                return handleCancel(selected);
+            }
+            case 2 -> {
+                if(selected.getBookingStatus() != BookingStatus.BOOKED){
+                    bookingView.printError("예매 완료 상태에서만 리뷰를 작성할 수 있습니다");
+                } else {
+                    reviewController.writeReview(selected.getBookingId());
+                }
+            }
+            case 0 -> { }
+            default -> bookingView.printError("올바른 번호를 입력해주세요.");
         }       
+        return false;
     }
 
-    private void handleCancel(BookingDTO booking) {
+    private boolean handleCancel(BookingDTO booking) {
         CancellationView cancelView = new CancellationView();
         if (!cancelView.confirmCancel(booking)) {
             System.out.println("취소를 중단했습니다.");
-            return;
+            return false;
         }
         int fee = (int)(booking.getPayment() * 0.1);
         try {
-            bookingService.cancel(booking.getBookingId(), fee);
+            boolean blacklisted = bookingService.cancel(booking.getBookingId(), fee);
+        
             bookingView.printSuccess("예매가 취소되었습니다.");
+            
+            if (blacklisted) {
+                bookingView.printError("최근 7일간 취소 횟수가 3회 이상이므로 블랙리스트로 등록되었습니다.");
+                DatabaseConnector.reset();
+                return true; // 블랙리스트 감지 신호 발송
+            }
+            
+            return false;
+            
         } catch (Exception e) {
             bookingView.printError("취소 실패: " + e.getMessage());
+            return false;
         }
     }
 }

@@ -49,7 +49,7 @@ public class BookingService {
         return bookingDAO.getAvailableCount(performanceId);
     }
 
-    public void cancel(int bookingId, int cancelFee) {
+    public boolean cancel(int bookingId, int cancelFee) {
         BookingDTO booking = bookingDAO.findById(bookingId); // 트랜잭션 밖 — 그냥 getConnection()
         if (booking == null)
             throw new RuntimeException("존재하지 않는 예매입니다.");
@@ -58,14 +58,19 @@ public class BookingService {
 
         try {
             Connection conn = tm.begin(); // conn 받아서
+            
             bookingDAO.updateStatus(conn, bookingId, BookingStatus.CANCELED.name()); // conn 넘김
+            
             CancellationDTO cancellation = new CancellationDTO();
             cancellation.setBookingId(bookingId);
             cancellation.setRefundAmount(booking.getPayment() - cancelFee);
             cancellation.setCancellationFee(cancelFee);
             cancellation.setCancelStatus(CancelStatus.REQUESTED);
             cancellationDAO.insert(conn, cancellation); // conn 넘김
+            
             tm.commit();
+            
+            return bookingDAO.isMemberBlacklisted(bookingId);
         } catch (Exception e) {
             tm.rollback();
             throw new RuntimeException("취소 처리 중 오류 발생: " + e.getMessage(), e);
