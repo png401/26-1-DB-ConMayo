@@ -125,19 +125,19 @@ public class AdminView {
     }
     
  // 공연좌석-가격 목록 출력
-    public void printPerfSeatList(List<PerformanceSeatDTO> list) {
-    	System.out.println("\n====== 좌석 가격 목록 ======");
+    public void printPerfSeatList(int performanceId, String title, List<PerformanceSeatDTO> list) {
+    	System.out.printf("\n====== [%s] 좌석 가격 목록 ======", title);
 
         if (list.isEmpty()) {
             System.out.println("등록된 좌석 정보가 없습니다.");
             return;
         }
 
-        System.out.println("공연ID\t좌석ID\t가격\n");
+        System.out.println("\n공연좌석 ID\t좌석ID\t가격");
 
         for (PerformanceSeatDTO seat : list) {
         	System.out.println(
-                    seat.getPerformanceId() + "\t"
+                    seat.getPerformanceSeatId() + "\t"
                     + seat.getSeatId() + "\t"
                     + seat.getPrice()
             );
@@ -187,5 +187,23 @@ public class AdminView {
 		int perfSeatId = sc.nextInt();
 		return perfSeatId;
 	}
-   
+	
+	// 좌석 가격 설정 시 공연 선택 메뉴
+	public int showSeatPriceMenu() {
+		System.out.println("\n====== 좌석 가격 설정 ======");
+		System.out.println("1. 공연 ID 입력하기");
+		System.out.println("2. 공연 이름으로 검색 후 ID 찾기");
+		System.out.print("선택 > ");
+		int menu = sc.nextInt();
+		sc.nextLine();
+		return menu;
+	}
+	
+	// 공연 이름 검색어 입력받기
+	public String inputPerformanceTitleKeyword() {
+        System.out.print("\n검색할 공연 이름을 입력하세요: ");
+        return sc.nextLine();
+	}
+	
+	
 }
