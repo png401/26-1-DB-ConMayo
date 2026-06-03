@@ -89,7 +89,7 @@ public class Main {
         SeatView seatView                             = new SeatView(seatController, bookingController);
         ReviewController reviewController             = new ReviewController(reviewService, reviewView);
         VenueController venueController               = new VenueController(venueService, adminView);
-        PerformanceSeatController perfSeatController  = new PerformanceSeatController(perfSeatService, adminView);
+        PerformanceSeatController perfSeatController  = new PerformanceSeatController(perfSeatService, performanceService, adminView);
         MemberController memberController             = new MemberController(memberService, memberView, adminView,
                                                             performanceController, bookingController, perfSeatController, venueController, seatController, seatView);
         memberController.setReviewController(reviewController); // 추가

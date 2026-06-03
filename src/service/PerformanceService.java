@@ -81,4 +81,18 @@ public class PerformanceService {
             perf.setSalesStatus(SalesStatus.OPEN);
         }
     }
+    
+    // 공연 이름 검색어 찾기
+    public List<PerformanceDTO> getPerformancesByTitleKeyword(String keyword) {
+        List<PerformanceDTO> allPerformances = performanceDAO.findAll();
+        if (allPerformances == null) {
+            return java.util.Collections.emptyList();
+        }
+        
+        // 키워드가 포함된 공연만 필터링하여 반환 
+        return allPerformances.stream()
+                .filter(perf -> perf.getTitle() != null && perf.getTitle().contains(keyword))
+                .peek(this::adjustSalesStatus) // 상태 보정 적용
+                .toList();
+    }
 }

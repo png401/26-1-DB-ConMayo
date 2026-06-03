@@ -116,7 +116,6 @@ public class PerformanceView {
         System.out.println("4. 스포츠");
         System.out.println("0. 뒤로");
         System.out.println();
-        System.out.print("선택 > ");
 
         return inputSecureInteger("선택 > ");
     }
