@@ -45,4 +45,10 @@ public class ReviewController {
         boolean success = reviewService.writeReview(review);
         reviewView.showMessage(success ? "리뷰가 등록되었습니다." : "리뷰 등록에 실패했습니다.");
     }
+    
+    // 좌석 ID 기준 리뷰 목록 출력 (JOptionPane으로 표시)
+    public void showReviewsBySeat(int seatId) {
+        List<ReviewDTO> reviews = reviewService.getReviewsBySeat(seatId);
+        reviewView.printReviewsBySeatDialog(reviews); // JOptionPane 팝업으로
+    }
 }

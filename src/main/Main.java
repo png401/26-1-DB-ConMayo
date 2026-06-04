@@ -86,8 +86,8 @@ public class Main {
         PerformanceController performanceController   = new PerformanceController(performanceService, performanceView, adminView, perfSeatService);
         BookingController bookingController           = new BookingController(bookingService, bookingView);
         SeatController seatController                 = new SeatController(seatService, bookingController);
-        SeatView seatView                             = new SeatView(seatController, bookingController);
         ReviewController reviewController             = new ReviewController(reviewService, reviewView);
+        SeatView seatView                             = new SeatView(seatController, bookingController, reviewController);
         VenueController venueController               = new VenueController(venueService, adminView);
         PerformanceSeatController perfSeatController  = new PerformanceSeatController(perfSeatService, performanceService, adminView);
         MemberController memberController             = new MemberController(memberService, memberView, adminView,

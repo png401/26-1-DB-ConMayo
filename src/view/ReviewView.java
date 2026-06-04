@@ -55,4 +55,19 @@ public class ReviewView {
     public void showMessage(String msg) {
         JOptionPane.showMessageDialog(null, msg);
     }
+    
+    //[출력] 해당 좌석 리뷰 보여주
+    public void printReviewsBySeatDialog(List<ReviewDTO> reviews) {
+        if (reviews.isEmpty()) {
+            JOptionPane.showMessageDialog(null, "이 좌석의 리뷰가 없습니다.");
+            return;
+        }
+        StringBuilder sb = new StringBuilder();
+        for (ReviewDTO r : reviews) {
+            sb.append(String.format("★%d점 | %s%n", r.getSeatRating(),
+                    r.getWrittenAt().toLocalDate()));
+            sb.append("  ").append(r.getContent()).append("\n\n");
+        }
+        JOptionPane.showMessageDialog(null, sb.toString(), "좌석 리뷰", JOptionPane.PLAIN_MESSAGE);
+    }
 }

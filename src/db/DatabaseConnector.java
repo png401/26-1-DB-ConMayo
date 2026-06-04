@@ -55,7 +55,7 @@ public class DatabaseConnector {
     // Connection 객체 반환
     // 생성된 Connection은 DAOImpl 생성자 등에 전달하여 사용
     public static Connection getConnection() throws SQLException {
-    	System.out.println("현재 접속 계정: " + USER);
+    	//System.out.println("현재 접속 계정: " + USER);
         return DriverManager.getConnection(URL, USER, PASSWORD);
     }
 }
