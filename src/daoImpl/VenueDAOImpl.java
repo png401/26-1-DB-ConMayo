@@ -20,7 +20,7 @@ public class VenueDAOImpl implements VenueDAO {
         // SELECT * FROM venue
         // → 관리자 공연장 목록 조회
         List<VenueDTO> list = new ArrayList<>();
-        String sql = "SELECT venue_id, venue_name, address FROM venue";
+        String sql = "SELECT venue_id, venue_name, address FROM venue ORDER BY venue_id ASC";
 
         try (Connection conn = DatabaseConnector.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql);

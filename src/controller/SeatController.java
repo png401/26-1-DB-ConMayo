@@ -46,4 +46,9 @@ public class SeatController {
     public int getAvailableCount(int performanceId) {
         return seatService.getAvailableCount(performanceId);
     }
+    
+    // [조회] 공연장별 좌석 목록 반환 (리뷰 전용)
+    public List<SeatDTO> openReviewPanel(int venueId) {
+        return seatService.getSeatsByVenue(venueId);
+    }
 }

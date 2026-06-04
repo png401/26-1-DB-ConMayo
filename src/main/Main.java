@@ -42,6 +42,7 @@ import view.PerformanceView;
 import view.BookingView;
 import view.ReviewView;
 import view.SeatView;
+import view.VenueView;
 import view.AdminView;
 
 public class Main {
@@ -79,6 +80,7 @@ public class Main {
         BookingView bookingView         = new BookingView();
         ReviewView reviewView           = new ReviewView();
         AdminView adminView             = new AdminView(); // 관리자 전용 뷰
+        VenueView venueView				= new VenueView();
 
         // ⑤ Controller 생성 — Service + View 주입
         // MemberController는 블랙리스트(관리자 기능)도 담당 -> adminView도 주입
@@ -88,7 +90,7 @@ public class Main {
         SeatController seatController                 = new SeatController(seatService, bookingController);
         ReviewController reviewController             = new ReviewController(reviewService, reviewView);
         SeatView seatView                             = new SeatView(seatController, bookingController, reviewController);
-        VenueController venueController               = new VenueController(venueService, adminView);
+        VenueController venueController               = new VenueController(venueService, adminView, venueView);
         PerformanceSeatController perfSeatController  = new PerformanceSeatController(perfSeatService, performanceService, adminView);
         MemberController memberController             = new MemberController(memberService, memberView, adminView,
                                                             performanceController, bookingController, perfSeatController, venueController, seatController, seatView);

@@ -4,8 +4,9 @@
 CREATE USER IF NOT EXISTS 'conmayo_user'@'localhost' IDENTIFIED BY 'user_pw123';
 GRANT SELECT ON conmayo.* TO 'conmayo_user'@'localhost';
 GRANT INSERT, UPDATE ON conmayo.booking TO 'conmayo_user'@'localhost';
-GRANT INSERT ON conmayo.review TO 'conmayo_user'@'localhost';
+GRANT INSERT, UPDATE ON conmayo.review TO 'conmayo_user'@'localhost';
 GRANT INSERT ON conmayo.cancellation TO 'conmayo_user'@'localhost';
+GRANT UPDATE ON conmayo.member TO 'conmayo_user'@'localhost';
 
 -- 관리자용 계정
 CREATE USER IF NOT EXISTS 'conmayo_admin'@'localhost' IDENTIFIED BY 'admin_pw123';

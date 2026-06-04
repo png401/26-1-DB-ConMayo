@@ -51,4 +51,40 @@ public class ReviewController {
         List<ReviewDTO> reviews = reviewService.getReviewsBySeat(seatId);
         reviewView.printReviewsBySeatDialog(reviews); // JOptionPane 팝업으로
     }
+    
+    // [조회] 내가 쓴 리뷰 목록 출력 + 수정 진입
+    public void showMyReviews(String memberId) {
+        List<ReviewDTO> reviews = reviewService.getMyReviews(memberId);
+        if (reviews.isEmpty()) {
+            reviewView.showMessage("작성한 리뷰가 없습니다.");
+            return;
+        }
+        // View에서 목록 출력 후 수정할 리뷰 번호 선택 (-1이면 그냥 나가기)
+        int reviewId = reviewView.printMyReviewsAndSelect(reviews);
+        if (reviewId == -1) return;
+
+        // 선택한 리뷰 찾기
+        ReviewDTO target = reviews.stream()
+                .filter(r -> r.getReviewId() == reviewId)
+                .findFirst().orElse(null);
+        if (target == null) {
+            reviewView.showMessage("존재하지 않는 리뷰입니다.");
+            return;
+        }
+
+        // 수정 입력
+        int rating = reviewView.inputRating();
+        if (rating == -1) return;
+        String content = reviewView.inputContent();
+        if (content == null || content.isBlank()) {
+            reviewView.showMessage("리뷰 내용을 입력해주세요.");
+            return;
+        }
+
+        target.setSeatRating(rating);
+        target.setContent(content);
+
+        boolean success = reviewService.updateReview(target);
+        reviewView.showMessage(success ? "리뷰가 수정되었습니다." : "리뷰 수정에 실패했습니다.");
+    }
 }

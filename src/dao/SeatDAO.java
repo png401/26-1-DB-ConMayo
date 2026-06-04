@@ -6,4 +6,5 @@ public interface SeatDAO {
     List<SeatDTO> findByPerformance(int performanceId);   // 공연별 좌석 전체 조회 (평점/예약여부 포함)
     double getAvgRating(int seatId);                      // 특정 좌석의 평균 평점 조회
     int getAvailableCount(int performanceId);              // 공연의 잔여석 수 조회
+    List<SeatDTO> findByVenue(int venueId);  // 공연장별 좌석 조회 (평점/색상만, 리뷰 전용)
 }
