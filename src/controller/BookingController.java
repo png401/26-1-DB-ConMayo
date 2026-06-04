@@ -7,7 +7,6 @@ import service.BookingService;
 import service.CancellationService;
 import view.BookingView;
 import view.CancellationView;
-import controller.ReviewController;
 import db.DatabaseConnector;
 
 import java.util.List;
@@ -37,7 +36,7 @@ public class BookingController {
         bookingService.book(booking);
     }
 
-    public boolean showMyBookings(String memberId, ReviewController reviewController) { 
+    public boolean showMyBookings(String memberId) { 
         List<BookingDTO> list = bookingService.getMyBookings(memberId);
         bookingView.printMyBookings(list);
 
@@ -61,13 +60,7 @@ public class BookingController {
                 // handleCancel의 결과를 상위 MemberController로 토스하기 위해 return 문 배치
                 return handleCancel(selected);
             }
-            case 2 -> {
-                if(selected.getBookingStatus() != BookingStatus.BOOKED){
-                    bookingView.printError("예매 완료 상태에서만 리뷰를 작성할 수 있습니다");
-                } else {
-                    reviewController.writeReview(selected.getBookingId());
-                }
-            }
+            
             case 0 -> { }
             default -> bookingView.printError("올바른 번호를 입력해주세요.");
         }       
@@ -98,5 +91,9 @@ public class BookingController {
             bookingView.printError("취소 실패: " + e.getMessage());
             return false;
         }
+    }
+    
+    public List<BookingDTO> getMyBookings(String memberId) {
+        return bookingService.getMyBookings(memberId);
     }
 }

@@ -2,6 +2,7 @@ package controller;
 
 import service.ReviewService;
 import view.ReviewView;
+import dto.BookingDTO;
 import dto.ReviewDTO;
 import java.util.List;
 
@@ -53,38 +54,50 @@ public class ReviewController {
     }
     
     // [조회] 내가 쓴 리뷰 목록 출력 + 수정 진입
-    public void showMyReviews(String memberId) {
+    public void showMyReviews(String memberId, List<BookingDTO> bookings) {
+        // BOOKED 상태이고 리뷰 없는 예매만 작성 가능
+        // 리뷰 있는 예매는 조회/수정 가능
+        
+        // 전체 내 리뷰 먼저 보여주기
         List<ReviewDTO> reviews = reviewService.getMyReviews(memberId);
-        if (reviews.isEmpty()) {
-            reviewView.showMessage("작성한 리뷰가 없습니다.");
-            return;
-        }
-        // View에서 목록 출력 후 수정할 리뷰 번호 선택 (-1이면 그냥 나가기)
-        int reviewId = reviewView.printMyReviewsAndSelect(reviews);
-        if (reviewId == -1) return;
-
-        // 선택한 리뷰 찾기
-        ReviewDTO target = reviews.stream()
-                .filter(r -> r.getReviewId() == reviewId)
+        
+        // 예매 목록 보여주고 선택
+        int bookingId = reviewView.printBookingsAndSelect(bookings);
+        if (bookingId == -1) return;
+        
+        // 선택한 예매에 리뷰 있는지 확인
+        BookingDTO selected = bookings.stream()
+                .filter(b -> b.getBookingId() == bookingId)
                 .findFirst().orElse(null);
-        if (target == null) {
-            reviewView.showMessage("존재하지 않는 리뷰입니다.");
-            return;
+        if (selected == null) return;
+        
+        if (selected.isHasReview()) {
+            // 리뷰 있으면 조회 + 수정
+            ReviewDTO target = reviews.stream()
+                    .filter(r -> r.getBookingId() == bookingId)
+                    .findFirst().orElse(null);
+            if (target == null) return;
+            reviewView.printReviewDetail(target);
+            if (!reviewView.confirmUpdate()) return;
+            // 수정 여부 확인
+            //int reviewId = target.getReviewId();
+            // 수정 입력
+            int rating = reviewView.inputRating();
+            if (rating == -1) return;
+            String content = reviewView.inputContent();
+            if (content == null || content.isBlank()) {
+                reviewView.showMessage("리뷰 내용을 입력해주세요.");
+                return;
+            }
+            target.setSeatRating(rating);
+            target.setContent(content);
+            boolean success = reviewService.updateReview(target);
+            reviewView.showMessage(success ? "리뷰가 수정되었습니다." : "리뷰 수정에 실패했습니다.");
+        } else {
+            // 리뷰 없으면 작성
+            writeReview(bookingId);
         }
-
-        // 수정 입력
-        int rating = reviewView.inputRating();
-        if (rating == -1) return;
-        String content = reviewView.inputContent();
-        if (content == null || content.isBlank()) {
-            reviewView.showMessage("리뷰 내용을 입력해주세요.");
-            return;
-        }
-
-        target.setSeatRating(rating);
-        target.setContent(content);
-
-        boolean success = reviewService.updateReview(target);
-        reviewView.showMessage(success ? "리뷰가 수정되었습니다." : "리뷰 수정에 실패했습니다.");
     }
+    
+    
 }

@@ -26,8 +26,10 @@ public class BookingView {
         }
         for (int i = 0; i < list.size(); i++) {
             BookingDTO b = list.get(i);
-            System.out.printf("[%d] 예매ID: %d | 공연명: %s | %d원 | 상태: %s%n",
-                    i + 1, b.getBookingId(), b.getPerformanceTitle() ,b.getPayment(), statusLabel(b.getBookingStatus()));
+            System.out.printf("[%d] 예매ID: %d | 공연명: %s | %d원 | 상태: %s%s%n",
+                    i + 1, b.getBookingId(), b.getPerformanceTitle(), b.getPayment(),
+                    statusLabel(b.getBookingStatus()),
+                    b.isHasReview() ? " | ✓ 리뷰작성완료" : "");
         }
         System.out.println("============================");
     }
@@ -47,7 +49,7 @@ public class BookingView {
     }
 
     public int inputAction() {
-        System.out.print("1. 예매취소  2. 리뷰작성  0. 뒤로\n선택 > ");
+        System.out.print("1. 예매취소  0. 뒤로\n선택 > ");
         try { return Integer.parseInt(sc.nextLine().trim()); }
         catch (NumberFormatException e) { return -1; }
     }

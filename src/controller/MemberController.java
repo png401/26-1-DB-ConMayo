@@ -10,6 +10,7 @@ import java.sql.SQLIntegrityConstraintViolationException;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
+import dto.BookingDTO;
 import dto.MemberDTO;
 import dto.MemberRole;
 
@@ -75,7 +76,7 @@ public class MemberController {
 
                 case 2:
                 	boolean isBlacklisted = (boolean) bookingController.showMyBookings(
-                            loginMember.getMemberId(), reviewController);
+                            loginMember.getMemberId());
                 	
                 	if (isBlacklisted) {
                 		return;
@@ -83,7 +84,8 @@ public class MemberController {
                     break;
                 
                 case 3:
-                    reviewController.showMyReviews(loginMember.getMemberId());
+                	List<BookingDTO> myBookings = bookingController.getMyBookings(loginMember.getMemberId());
+                    reviewController.showMyReviews(loginMember.getMemberId(), myBookings);
                     break;
 
                 case 4:

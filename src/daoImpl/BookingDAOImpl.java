@@ -89,19 +89,23 @@ public class BookingDAOImpl implements BookingDAO {
 
     @Override
     public List<BookingDTO> findByMemberId(String memberId) {
-        String sql = "SELECT * "
+        String sql = "SELECT b.*, p.title, "
+                + "CASE WHEN r.review_id IS NOT NULL THEN 1 ELSE 0 END AS has_review "
                 + "FROM booking b "
-                + "JOIN performance_seat ps "
-                + "ON b.performance_seat_id = ps.performance_seat_id "
-                + "JOIN performance p "
-                + "ON p.performance_id = ps.performance_id "
-                + "WHERE member_id = ? ORDER BY booked_at DESC ";
+                + "JOIN performance_seat ps ON b.performance_seat_id = ps.performance_seat_id "
+                + "JOIN performance p ON p.performance_id = ps.performance_id "
+                + "LEFT JOIN review r ON r.booking_id = b.booking_id "
+                + "WHERE b.member_id = ? ORDER BY b.booked_at DESC";
         List<BookingDTO> list = new ArrayList<>();
         try (Connection conn = DatabaseConnector.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, memberId);
             try (ResultSet rs = pstmt.executeQuery()) {
-                while (rs.next()) list.add(mapRow(rs));
+                while (rs.next()) {
+                    BookingDTO dto = mapRow(rs);
+                    dto.setHasReview(rs.getInt("has_review") == 1);
+                    list.add(dto);
+                }
             }
         } catch (SQLException e) {
             throw new RuntimeException("예매 내역 조회 실패: " + e.getMessage(), e);
