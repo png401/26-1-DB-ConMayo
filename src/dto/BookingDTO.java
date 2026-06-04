@@ -11,6 +11,7 @@ public class BookingDTO {
     private LocalDateTime bookedAt;	// 예매 시각 (DEFAULT CURRENT_TIMESTAMP)
     private int payment;            // 실결제 금액 (HOLD면 0)
     private String performanceTitle; // 공연
+    private boolean hasReview; //리뷰 작성 여부 
     
     public BookingDTO() {}
 
@@ -82,6 +83,14 @@ public class BookingDTO {
 	
 	public void setPerformanceTitle(String performanceTitle) {
 		this.performanceTitle = performanceTitle;
+	}
+
+	public boolean isHasReview() { 
+		return hasReview; 
+	}
+	
+	public void setHasReview(boolean hasReview) {
+		this.hasReview = hasReview; 
 	}
 	
 }

@@ -8,6 +8,12 @@ public class ReviewDTO {
     private int seatRating;  // 좌석 평점 (1~5, CHECK 제약)
     private LocalDateTime writtenAt; // 작성 시각 (DEFAULT CURRENT_TIMESTAMP)
     private String content;  // 리뷰 내용
+    
+    private String performanceTitle; // 공연명
+    private String section;          // 구역
+    private int rowNum;              // 행
+    private int colNum;              // 열
+    private String venueName;
 
     public ReviewDTO() {}
 
@@ -58,6 +64,46 @@ public class ReviewDTO {
 
 	public void setContent(String content) {
 		this.content = content;
+	}
+	
+	public String getPerformanceTitle() {
+		return performanceTitle; 
+	}
+	
+	public void setPerformanceTitle(String performanceTitle) {
+		this.performanceTitle = performanceTitle; 
+	}
+
+	public String getSection() { 
+		return section; 
+	}
+	
+	public void setSection(String section) {
+		this.section = section; 
+	}
+
+	public int getRowNum() { 
+		return rowNum;
+	}
+	
+	public void setRowNum(int rowNum) {
+		this.rowNum = rowNum; 
+	}
+
+	public int getColNum() {
+		return colNum; 
+	}
+	
+	public void setColNum(int colNum) {
+		this.colNum = colNum; 
+	}
+	
+	public String getVenueName() {
+		return venueName;
+	}
+	
+	public void setVenueName(String venueName) {
+		this.venueName = venueName;
 	}
 
 	@Override

@@ -106,9 +106,18 @@ public class ReviewDAOImpl implements ReviewDAO {
                        r.booking_id,
                        r.seat_rating,
                        r.written_at,
-                       r.content
+                       r.content,
+                       p.title AS performance_title,
+                       v.venue_name,
+                       s.section,
+                       s.row_num,
+                       s.col_num
                 FROM review r
                 JOIN booking b ON r.booking_id = b.booking_id
+                JOIN performance_seat ps ON b.performance_seat_id = ps.performance_seat_id
+                JOIN performance p ON ps.performance_id = p.performance_id
+                JOIN seat s ON ps.seat_id = s.seat_id
+                JOIN venue v ON p.venue_id = v.venue_id
                 WHERE b.member_id = ?
                 ORDER BY r.written_at DESC
                 """;
@@ -116,15 +125,21 @@ public class ReviewDAOImpl implements ReviewDAO {
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, memberId);
             try (ResultSet rs = pstmt.executeQuery()) {
-                while (rs.next()) {
-                    list.add(new ReviewDTO(
-                            rs.getInt("review_id"),
-                            rs.getInt("booking_id"),
-                            rs.getInt("seat_rating"),
-                            rs.getTimestamp("written_at").toLocalDateTime(),
-                            rs.getString("content")
-                    ));
-                }
+            	while (rs.next()) {
+            	    ReviewDTO dto = new ReviewDTO(
+            	            rs.getInt("review_id"),
+            	            rs.getInt("booking_id"),
+            	            rs.getInt("seat_rating"),
+            	            rs.getTimestamp("written_at").toLocalDateTime(),
+            	            rs.getString("content")
+            	    );
+            	    dto.setPerformanceTitle(rs.getString("performance_title"));
+            	    dto.setVenueName(rs.getString("venue_name"));
+            	    dto.setSection(rs.getString("section"));
+            	    dto.setRowNum(rs.getInt("row_num"));
+            	    dto.setColNum(rs.getInt("col_num"));
+            	    list.add(dto);
+            	}
             }
         } catch (SQLException e) {
             System.out.println("내 리뷰 목록 조회 실패: " + e.getMessage());

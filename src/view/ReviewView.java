@@ -1,10 +1,14 @@
 package view;
 
 import dto.ReviewDTO;
+import dto.BookingDTO;
+import dto.BookingStatus;
+import java.util.Scanner;
 import javax.swing.JOptionPane;
 import java.util.List;
 
 public class ReviewView {
+	private final Scanner sc = new Scanner(System.in);
 
     // [출력] 리뷰 목록 출력 (콘솔)
     public void displayReviews(List<ReviewDTO> list) {
@@ -77,9 +81,13 @@ public class ReviewView {
         sb.append("내 리뷰 목록\n");
         sb.append("═══════════════════════════════\n");
         for (ReviewDTO r : reviews) {
-            sb.append(String.format("[ID:%d] ★%d점 | %s%n",
-                    r.getReviewId(), r.getSeatRating(), r.getWrittenAt().toLocalDate()));
-            sb.append("  ").append(r.getContent()).append("\n\n");
+        	sb.append(String.format("[ID:%d] ★%d점 | %s | %s | %s %d행 %d열 | %s%n",
+        	        r.getReviewId(), r.getSeatRating(),
+        	        r.getPerformanceTitle(),
+        	        r.getVenueName(),
+        	        r.getSection(), r.getRowNum(), r.getColNum(),
+        	        r.getWrittenAt().toLocalDate()));
+        	sb.append("  ").append(r.getContent()).append("\n\n");
         }
         sb.append("═══════════════════════════════");
 
@@ -98,5 +106,48 @@ public class ReviewView {
             showMessage("올바른 ID를 입력해주세요.");
             return -1;
         }
+    }
+    
+    // [출력] 예매 목록 출력 후 bookingId 선택 (-1이면 취소)
+    public int printBookingsAndSelect(List<BookingDTO> bookings) {
+        System.out.println("\n====== 예매 목록 ======");
+        for (int i = 0; i < bookings.size(); i++) {
+            BookingDTO b = bookings.get(i);
+            if (b.getBookingStatus() != BookingStatus.BOOKED) continue;
+            System.out.printf("[%d] 예매ID: %d | %s | %s%n",
+                    i + 1, b.getBookingId(), b.getPerformanceTitle(),
+                    b.isHasReview() ? "✓ 리뷰있음" : "리뷰없음");
+        }
+        System.out.println("리뷰 작성/수정할 예매 번호를 선택하세요. (0. 뒤로)");
+        System.out.print("선택 > ");
+        try {
+            int index = Integer.parseInt(sc.nextLine().trim());
+            if (index == 0) return -1;
+            if (index >= 1 && index <= bookings.size()) {
+                return bookings.get(index - 1).getBookingId();
+            }
+            return -1;
+        } catch (NumberFormatException e) {
+            return -1;
+        }
+    }
+    
+    // [출력] 리뷰 상세 조회
+    public void printReviewDetail(ReviewDTO review) {
+        System.out.println("\n====== 내 리뷰 ======");
+        System.out.printf("공연: %s | %s | %s %d행 %d열%n",
+                review.getPerformanceTitle(), review.getVenueName(),
+                review.getSection(), review.getRowNum(), review.getColNum());
+        System.out.printf("★%d점 | %s%n", review.getSeatRating(),
+                review.getWrittenAt().toLocalDate());
+        System.out.println(review.getContent());
+        System.out.println("====================");
+    }
+    
+    public boolean confirmUpdate() {
+        int result = JOptionPane.showConfirmDialog(null,
+                "리뷰를 수정하시겠습니까?", "리뷰 수정",
+                JOptionPane.YES_NO_OPTION);
+        return result == JOptionPane.YES_OPTION;
     }
 }
