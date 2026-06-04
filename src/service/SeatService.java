@@ -34,4 +34,13 @@ public class SeatService {
         if (avgRating < 5.0)  return "LIME";
         return "GREEN";
     }
+    
+    // [조회] 공연장별 좌석 목록 반환 (평점/색상만 — 리뷰 전용)
+    public List<SeatDTO> getSeatsByVenue(int venueId) {
+        List<SeatDTO> seats = seatDAO.findByVenue(venueId);
+        for (SeatDTO seat : seats) {
+            seat.setColor(getRatingColor(seat.getAvgRating()));
+        }
+        return seats;
+    }
 }

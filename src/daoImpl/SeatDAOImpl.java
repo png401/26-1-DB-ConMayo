@@ -129,4 +129,53 @@ public class SeatDAOImpl implements SeatDAO {
         }
         return 0;
     }
+    
+	 // [조회] 공연장별 전체 좌석 목록 반환 (평점, 색상만 — 리뷰 조회 전용)
+	 // 가격/예약여부 불필요 -> performance_seat 조인 없이 seat 기준으로 조회
+	 @Override
+	 public List<SeatDTO> findByVenue(int venueId) {
+	     List<SeatDTO> list = new ArrayList<>();
+	     String sql = """
+	             SELECT s.seat_id,
+	                    s.venue_id,
+	                    s.section,
+	                    s.row_num,
+	                    s.col_num,
+	                    (
+	                        SELECT AVG(r.seat_rating)
+	                        FROM review r
+	                        JOIN booking b ON r.booking_id = b.booking_id
+	                        JOIN performance_seat ps ON b.performance_seat_id = ps.performance_seat_id
+	                        WHERE ps.seat_id = s.seat_id
+	                    ) AS avg_rating
+	             FROM seat s
+	             WHERE s.venue_id = ?
+	             ORDER BY s.section, s.row_num, s.col_num
+	             """;
+	     try (Connection conn = DatabaseConnector.getConnection();
+	          PreparedStatement pstmt = conn.prepareStatement(sql)) {
+	         pstmt.setInt(1, venueId);
+	         try (ResultSet rs = pstmt.executeQuery()) {
+	             while (rs.next()) {
+	                 SeatDTO seat = new SeatDTO(
+	                         rs.getInt("seat_id"),
+	                         rs.getInt("venue_id"),
+	                         0,  // performanceSeatId 없음
+	                         rs.getString("section"),
+	                         rs.getInt("row_num"),
+	                         rs.getInt("col_num")
+	                 );
+	                 double avg = rs.getDouble("avg_rating");
+	                 seat.setAvgRating(rs.wasNull() ? 0.0 : avg);
+	                 seat.setPrice(0);       // 리뷰 전용이라 가격 불필요
+	                 seat.setBooked(false);  // 예약 여부 불필요
+	                 list.add(seat);
+	             }
+	         }
+	     } catch (SQLException e) {
+	         System.out.println("공연장별 좌석 조회 실패: " + e.getMessage());
+	     }
+	     return list;
+	 }
+    
 }

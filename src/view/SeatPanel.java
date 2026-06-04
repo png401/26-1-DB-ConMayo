@@ -20,13 +20,15 @@ public class SeatPanel extends JDialog {
     private SeatDTO selectedSeat;
     private final ReviewController reviewController;
     private JButton reviewBtn;
+    private final boolean reviewOnly;
 
-    public SeatPanel(List<SeatDTO> seats, int availableCount, SeatController seatController, BookingController bookingController, ReviewController reviewController, String memberId) {
+    public SeatPanel(List<SeatDTO> seats, int availableCount, SeatController seatController, BookingController bookingController, ReviewController reviewController, String memberId, boolean reviewOnly) {
         this.seats = seats;
         this.seatController = seatController;
         this.bookingController = bookingController;
         this.reviewController = reviewController;
         this.memberId = memberId;
+        this.reviewOnly = reviewOnly;
         initUI();
     }
 
@@ -211,6 +213,12 @@ public class SeatPanel extends JDialog {
                 selectedInfoLabel.setText("좌석을 선택해주세요.");
             }
         });
+        
+        // reviewOnly 모드면 결제 버튼 비활성
+        if (reviewOnly) {
+            payBtn.setEnabled(false);
+            payBtn.setToolTipText("리뷰 조회 모드입니다.");
+        }
 
         JButton backBtn = new JButton("뒤로가기");
         backBtn.setBackground(new Color(180, 180, 180));

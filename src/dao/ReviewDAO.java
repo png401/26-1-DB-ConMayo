@@ -6,4 +6,6 @@ public interface ReviewDAO {
     List<ReviewDTO> findBySeatId(int seatId);        // 좌석 ID로 리뷰 목록 조회
     boolean insert(ReviewDTO review);                   // 리뷰 등록
     boolean existsByBookingId(int bookingId);         // 해당 예매에 리뷰가 이미 있는지 확인 (중복 방지)
+    List<ReviewDTO> findByMemberId(String memberId);  // 내 리뷰 목록 조회
+    boolean update(ReviewDTO review);                  // 리뷰 수정
 }

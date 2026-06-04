@@ -57,5 +57,20 @@ public class ReviewService {
         // 모든 체크 통과 -> INSERT
         return reviewDAO.insert(review);
     }
+    
+    // [조회] 내가 쓴 리뷰 목록 반환
+    public List<ReviewDTO> getMyReviews(String memberId) {
+        return reviewDAO.findByMemberId(memberId);
+    }
+
+    // [수정] 리뷰 수정
+    // 평점 범위만 체크 후 update
+    public boolean updateReview(ReviewDTO review) {
+        if (review.getSeatRating() < 1 || review.getSeatRating() > 5) {
+            System.out.println("평점은 1~5 사이여야 합니다.");
+            return false;
+        }
+        return reviewDAO.update(review);
+    }
 
 }

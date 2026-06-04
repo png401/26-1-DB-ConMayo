@@ -4,12 +4,16 @@ import java.util.List;
 import dto.VenueDTO;
 import service.VenueService;
 import view.AdminView;
+import view.VenueView;
 public class VenueController {
     private final VenueService venueService;
     private final AdminView adminView;
-    public VenueController(VenueService venueService, AdminView adminView) {
+    private final VenueView venueView;
+    
+    public VenueController(VenueService venueService, AdminView adminView, VenueView venueView) {
         this.venueService = venueService;
         this.adminView = adminView;
+        this.venueView = venueView;
     }
 
     // 1. 공연장 전체 목록 출력
@@ -53,5 +57,11 @@ public class VenueController {
         venueService.removeVenue(venueId);
         adminView.printSuccess("공연장이 삭제되었습니다.");
         showAll();
+    }
+    
+    // 5. 사용자용 공연장 목록 출력 후 venueId 반환
+    public int showListForUser() {
+        List<VenueDTO> list = venueService.getAllVenues();
+        return venueView.showVenueList(list);
     }
 }

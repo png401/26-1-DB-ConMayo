@@ -56,7 +56,7 @@ public class ReviewView {
         JOptionPane.showMessageDialog(null, msg);
     }
     
-    //[출력] 해당 좌석 리뷰 보여주
+    //[출력] 해당 좌석 리뷰 보여주기 
     public void printReviewsBySeatDialog(List<ReviewDTO> reviews) {
         if (reviews.isEmpty()) {
             JOptionPane.showMessageDialog(null, "이 좌석의 리뷰가 없습니다.");
@@ -69,5 +69,34 @@ public class ReviewView {
             sb.append("  ").append(r.getContent()).append("\n\n");
         }
         JOptionPane.showMessageDialog(null, sb.toString(), "좌석 리뷰", JOptionPane.PLAIN_MESSAGE);
+    }
+    
+    // [출력] 내 리뷰 목록 출력 + 수정할 리뷰 ID 선택 (-1이면 취소)
+    public int printMyReviewsAndSelect(List<ReviewDTO> reviews) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("내 리뷰 목록\n");
+        sb.append("═══════════════════════════════\n");
+        for (ReviewDTO r : reviews) {
+            sb.append(String.format("[ID:%d] ★%d점 | %s%n",
+                    r.getReviewId(), r.getSeatRating(), r.getWrittenAt().toLocalDate()));
+            sb.append("  ").append(r.getContent()).append("\n\n");
+        }
+        sb.append("═══════════════════════════════");
+
+        String input = JOptionPane.showInputDialog(
+                null,
+                sb.toString() + "\n\n수정할 리뷰 ID를 입력하세요. (취소하려면 닫기)",
+                "내 리뷰 조회",
+                JOptionPane.PLAIN_MESSAGE
+        );
+
+        if (input == null || input.isBlank()) return -1;
+
+        try {
+            return Integer.parseInt(input.trim());
+        } catch (NumberFormatException e) {
+            showMessage("올바른 ID를 입력해주세요.");
+            return -1;
+        }
     }
 }

@@ -25,6 +25,8 @@ public class MemberView {
     	System.out.println("\n====== 회원 메뉴 ======");
     	System.out.println("1. 공연 조회");
     	System.out.println("2. 내 예매 조회");
+    	System.out.println("3. 내 리뷰 조회/수정");   // 추가
+        System.out.println("4. 공연장 리뷰 조회");     // 추가
     	System.out.println("0. 로그아웃");
     	System.out.println();
     	System.out.print("선택 > ");

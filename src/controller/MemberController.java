@@ -74,14 +74,26 @@ public class MemberController {
                     break;
 
                 case 2:
-                	boolean isBlacklisted = bookingController.showMyBookings(
+                	boolean isBlacklisted = (boolean) bookingController.showMyBookings(
                             loginMember.getMemberId(), reviewController);
                 	
                 	if (isBlacklisted) {
                 		return;
                 	}
                     break;
+                
+                case 3:
+                    reviewController.showMyReviews(loginMember.getMemberId());
+                    break;
 
+                case 4:
+                    int venueId = venueController.showListForUser();
+                    if (venueId != 0) {
+                        List<SeatDTO> seats = seatController.openReviewPanel(venueId);
+                        seatView.showReviewOnlyPanel(seats, 0, loginMember.getMemberId());
+                    }
+                    break;
+                    	
                 case 0:
                     DatabaseConnector.reset(); // 로그아웃 시 기본 계정으로 복귀
                     return;

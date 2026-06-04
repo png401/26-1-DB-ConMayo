@@ -96,4 +96,59 @@ public class ReviewDAOImpl implements ReviewDAO {
         }
         return false;
     }
+    
+ // [조회] 로그인한 회원이 작성한 리뷰 목록 반환 (최신순)
+    @Override
+    public List<ReviewDTO> findByMemberId(String memberId) {
+        List<ReviewDTO> list = new ArrayList<>();
+        String sql = """
+                SELECT r.review_id,
+                       r.booking_id,
+                       r.seat_rating,
+                       r.written_at,
+                       r.content
+                FROM review r
+                JOIN booking b ON r.booking_id = b.booking_id
+                WHERE b.member_id = ?
+                ORDER BY r.written_at DESC
+                """;
+        try (Connection conn = DatabaseConnector.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, memberId);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    list.add(new ReviewDTO(
+                            rs.getInt("review_id"),
+                            rs.getInt("booking_id"),
+                            rs.getInt("seat_rating"),
+                            rs.getTimestamp("written_at").toLocalDateTime(),
+                            rs.getString("content")
+                    ));
+                }
+            }
+        } catch (SQLException e) {
+            System.out.println("내 리뷰 목록 조회 실패: " + e.getMessage());
+        }
+        return list;
+    }
+
+    // [수정] 리뷰 UPDATE -> 성공 시 true, 실패 시 false
+    @Override
+    public boolean update(ReviewDTO review) {
+        String sql = """
+                UPDATE review
+                SET seat_rating = ?, content = ?,written_at = NOW()
+                WHERE review_id = ?
+                """;
+        try (Connection conn = DatabaseConnector.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, review.getSeatRating());
+            pstmt.setString(2, review.getContent());
+            pstmt.setInt(3, review.getReviewId());
+            return pstmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.out.println("리뷰 수정 실패: " + e.getMessage());
+            return false;
+        }
+    }
 }
