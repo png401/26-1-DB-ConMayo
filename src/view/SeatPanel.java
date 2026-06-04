@@ -1,6 +1,7 @@
 package view;
 
 import controller.BookingController;
+import controller.ReviewController;
 import controller.SeatController;
 import dto.SeatDTO;
 
@@ -17,11 +18,14 @@ public class SeatPanel extends JDialog {
 
     private JLabel selectedInfoLabel;
     private SeatDTO selectedSeat;
+    private final ReviewController reviewController;
+    private JButton reviewBtn;
 
-    public SeatPanel(List<SeatDTO> seats, int availableCount, SeatController seatController, BookingController bookingController, String memberId) {
+    public SeatPanel(List<SeatDTO> seats, int availableCount, SeatController seatController, BookingController bookingController, ReviewController reviewController, String memberId) {
         this.seats = seats;
         this.seatController = seatController;
         this.bookingController = bookingController;
+        this.reviewController = reviewController;
         this.memberId = memberId;
         initUI();
     }
@@ -216,10 +220,25 @@ public class SeatPanel extends JDialog {
         backBtn.setFont(new Font("맑은 고딕", Font.BOLD, 14));
         backBtn.setPreferredSize(new Dimension(150, 40));
         backBtn.addActionListener(e -> dispose());
+        
+        this.reviewBtn = new JButton("리뷰 보기");
+        reviewBtn.setBackground(new Color(100, 100, 100));
+        reviewBtn.setForeground(Color.WHITE);
+        reviewBtn.setOpaque(true);
+        reviewBtn.setBorderPainted(false);
+        reviewBtn.setFont(new Font("맑은 고딕", Font.BOLD, 14));
+        reviewBtn.setPreferredSize(new Dimension(150, 40));
+        reviewBtn.setEnabled(false); // 좌석 선택 전엔 비활성
+
+        reviewBtn.addActionListener(e -> {
+            if (selectedSeat == null) return;
+            reviewController.showReviewsBySeat(selectedSeat.getSeatId());
+        });
 
         JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 0));
         btnPanel.add(backBtn);
         btnPanel.add(payBtn);
+        btnPanel.add(reviewBtn);
         panel.add(btnPanel, BorderLayout.SOUTH);
 
         return panel;
@@ -230,6 +249,7 @@ public class SeatPanel extends JDialog {
         String info = String.format("선택 : %s구역 %d행 %d열  | 가격 : %d | ★ %.1f점",
                 seat.getSection(), seat.getRowNum(), seat.getColNum(), seat.getPrice(), seat.getAvgRating());
         selectedInfoLabel.setText(info);
+        reviewBtn.setEnabled(true); // 좌석 선택되면 활성화
     }
 
     // 색상 문자열 -> Color 변환
