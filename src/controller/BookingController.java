@@ -76,11 +76,15 @@ public class BookingController {
 
     private boolean handleCancel(BookingDTO booking) {
         CancellationView cancelView = new CancellationView();
-        if (!cancelView.confirmCancel(booking)) {
+        //수정
+        int fee =
+                bookingService.calculateCancellationFee(
+                        booking
+                );
+        if (!cancelView.confirmCancel(booking, fee)) {
             System.out.println("취소를 중단했습니다.");
             return false;
         }
-        int fee = (int)(booking.getPayment() * 0.1);
         try {
             boolean blacklisted = bookingService.cancel(booking.getBookingId(), fee);
         
