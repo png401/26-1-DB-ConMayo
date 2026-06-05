@@ -115,18 +115,12 @@ public class BookingDAOImpl implements BookingDAO {
 
     @Override
     public int getAvailableCount(int performanceId) {
-        String sql = "SELECT " +
-                     "  (SELECT COUNT(*) FROM performance_seat WHERE performance_id = ?) " +
-                     "- (SELECT COUNT(*) FROM booking b " +
-                     "   JOIN performance_seat ps ON b.performance_seat_id = ps.performance_seat_id " +
-                     "   WHERE ps.performance_id = ? AND b.booking_status IN ('HOLD', 'BOOKED')) " +
-                     "AS available_count";
+        String sql = "SELECT get_remaining_seats(?)";
         try (Connection conn = DatabaseConnector.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, performanceId);
-            pstmt.setInt(2, performanceId);
             try (ResultSet rs = pstmt.executeQuery()) {
-                if (rs.next()) return rs.getInt("available_count");
+                if (rs.next()) return rs.getInt(1);
             }
         } catch (SQLException e) {
             throw new RuntimeException("잔여석 조회 실패: " + e.getMessage(), e);
