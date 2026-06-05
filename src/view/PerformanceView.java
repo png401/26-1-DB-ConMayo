@@ -218,4 +218,11 @@ System.out.println("\n=== 공연 등록 ==================");
         
         return performance; 
     }
+    
+    public boolean confirmDelete(String title) {
+        System.out.printf("\n⚠ 정말 공연 '%s'을(를) 삭제하시겠습니까?\n", title);
+        System.out.print("삭제하려면 'y'를, 취소하려면 아무 키나 누르세요 (y/n) > ");
+        String input = sc.nextLine().trim();
+        return input.equalsIgnoreCase("Y");
+    }
 }

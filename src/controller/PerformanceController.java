@@ -110,6 +110,8 @@ public class PerformanceController {
     // 4. 공연 등록 (관리자)
     public void add() {
     	if (adminView == null) return;
+    	printListForAdmin();
+
         try {
             PerformanceDTO newPerformance = performanceView.inputPerformanceInfo();
             
@@ -149,6 +151,8 @@ public class PerformanceController {
     // 5. 공연 수정 (관리자)
     public void modify() {
     	if (adminView == null) return;
+    	printListForAdmin();
+
         int performanceId = adminView.inputPerformanceId();
 
         PerformanceDTO existingPerf = performanceService.getPerformance(performanceId);
@@ -190,15 +194,36 @@ public class PerformanceController {
     // 6. 공연 삭제 (관리자)
     public void remove() {
     	if (adminView == null) return;
+    	printListForAdmin();
+    	
         int performanceId = adminView.inputPerformanceId();
+        
+        // 공연 존재 여부 체크
+        PerformanceDTO targetPerf = performanceService.getPerformance(performanceId);
+        if (targetPerf == null) {
+            adminView.printError("존재하지 않는 공연 ID입니다.");
+            return;
+        }
+        
+        var seatList = perfSeatService.getSeatsByPerformance(performanceId);
+        if (seatList != null && !seatList.isEmpty()) {
+            System.out.println("\n❌ [삭제 불가] 관객의 예매 정보나 좌석 배치가 남아있는 공연은 삭제할 수 없습니다.");
+            return; // 쿼리를 날리지 않고 여기서 바로 함수 종료
+        }
+        
+        if (!performanceView.confirmDelete(targetPerf.getTitle())) {
+            System.out.println("❌ 공연 삭제가 취소되었습니다.");
+            return;
+        }
         
         try {
             performanceService.removePerformance(performanceId);
             adminView.printSuccess("공연이 성공적으로 삭제되었습니다.");
             printListForAdmin();
         } catch (Exception e) {
-            System.out.println("\n[오류] 공연 삭제에 실패했습니다.");
-            System.out.println("⚠ 에러 원인: " + e.getMessage());
+            System.out.println("\n 공연 삭제에 실패했습니다.");
+            System.out.println("⚠ 원인: " + e.getMessage());
+            }
         }
-    }
+    
 }
