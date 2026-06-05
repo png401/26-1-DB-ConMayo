@@ -134,16 +134,22 @@ System.out.println("\n=== 공연 등록 ==================");
             System.out.print("공연 제목 > ");
             title = sc.nextLine().trim();
             if (title.isEmpty()) {
-                System.out.println("⚠ 공연 제목은 필수 입력 항목입니다. 공백 없이 입력해주세요.");
+                System.out.println("⚠ 공연 제목은 필수 입력 항목입니다.");
             }
         }
         
         String category = "";
-        while (category.isEmpty()) {
+        while (true) {
             System.out.print("카테고리(뮤지컬/스포츠/콘서트) > ");
             category = sc.nextLine().trim();
+            if (category.equals("뮤지컬") || category.equals("콘서트") || category.equals("스포츠")) {
+                break;
+            }
+            System.out.println("⚠ 등록할 수 없는 카테고리 장르입니다. 지정된 카테고리를 정확히 입력해 주세요.");
+        
             if (category.isEmpty()) {
-                System.out.println("⚠ 카테고리는 필수 입력 항목입니다. 공백 없이 입력해주세요.");
+                System.out.println("⚠ 카테고리는 필수 입력 항목입니다.");
+                continue;
             }
         }
         
