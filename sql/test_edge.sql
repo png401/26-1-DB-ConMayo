@@ -99,7 +99,7 @@ USE conmayo;
 -- INSERT INTO booking (member_id, performance_seat_id, booking_status, booked_at, payment)
 -- VALUES ('user05', 2, 'HOLD', NOW(), 220000);
 
--- [코드로 차단] payment 음수 — DDL에 CHECK 제약 없음, 추가 권장
+-- [실패 okay] payment 음수 (CHECK 위반)
 -- INSERT INTO booking (member_id, performance_seat_id, booking_status, booked_at, payment)
 -- VALUES ('user01', 4, 'HOLD', NOW(), -5000);
 
@@ -132,15 +132,15 @@ USE conmayo;
 -- INSERT INTO review (booking_id, seat_rating, written_at, content)
 -- VALUES (9999, 4, NOW(), '없는 예매 리뷰');
 
--- [코드로 차단] CANCELED 예매에 리뷰 작성 — booking_id=12는 CANCELED 상태 (DB는 허용)
+-- [실패 okay] CANCELED 예매에 리뷰 작성 — booking_id=12는 CANCELED 상태 - trg_review_insert_guard 트리거 차단
 -- INSERT INTO review (booking_id, seat_rating, written_at, content)
 -- VALUES (12, 3, NOW(), '취소했는데 리뷰 달아봄');
 
--- [코드로 차단] HOLD 예매에 리뷰 작성 — booking_id=14는 HOLD 상태 (DB는 허용)
+-- [실패 okay] HOLD 예매에 리뷰 작성 — booking_id=14는 HOLD 상태 - trg_review_insert_guard 트리거 차단
 -- INSERT INTO review (booking_id, seat_rating, written_at, content)
 -- VALUES (14, 5, NOW(), '결제도 안 했는데 리뷰 달아봄');
 
--- [코드로 차단] 공연 시작 전 날짜로 리뷰 작성 — booking_id=16, 공연 start_time=2026-06-01 (DB는 허용)
+-- [실패 okay] 공연 시작 전 날짜로 리뷰 작성 — booking_id=16, 공연 start_time=2026-06-01 — trg_review_insert_guard 트리거 차단
 -- INSERT INTO review (booking_id, seat_rating, written_at, content)
 -- VALUES (16, 5, '2026-05-30 09:00:00', '공연도 안 봤는데 미리 리뷰');
 
@@ -160,3 +160,15 @@ USE conmayo;
 -- [실패 okay] 잘못된 cancel_status ENUM 값
 -- INSERT INTO cancellation (booking_id, refund_amount, cancellation_fee, cancel_status)
 -- VALUES (22, 165000, 0, 'DONE');
+
+-- [실패 okay] refund_amount 음수 (CHECK 위반)
+-- INSERT INTO cancellation (booking_id, refund_amount, cancellation_fee, cancel_status)
+-- VALUES (201, -50000, 0, 'REQUESTED');
+
+-- [실패 okay] cancellation_fee 음수 (CHECK 위반)
+-- INSERT INTO cancellation (booking_id, refund_amount, cancellation_fee, cancel_status)
+-- VALUES (201, 150000, -10000, 'REQUESTED');
+
+-- [실패 okay] cancellation_fee > refund_amount (CHECK 위반)
+-- INSERT INTO cancellation (booking_id, refund_amount, cancellation_fee, cancel_status)
+-- VALUES (201, 10000, 50000, 'REQUESTED');
