@@ -1,6 +1,6 @@
 package service;
 
-import dao.BookingDAO;
+import dao.BookingDAO; //이미 존재
 import dao.CancellationDAO;
 import db.TransactionManager;
 import dto.BookingDTO;
@@ -10,6 +10,9 @@ import dto.CancelStatus;
 
 import java.sql.Connection;
 import java.util.List;
+import java.time.LocalDate; //추가
+import java.time.LocalDateTime; //추가
+import java.time.temporal.ChronoUnit; //추가
 
 public class BookingService {
     private final BookingDAO bookingDAO;
@@ -65,7 +68,7 @@ public class BookingService {
             cancellation.setBookingId(bookingId);
             cancellation.setRefundAmount(booking.getPayment() - cancelFee);
             cancellation.setCancellationFee(cancelFee);
-            cancellation.setCancelStatus(CancelStatus.REQUESTED);
+            cancellation.setCancelStatus(CancelStatus.REFUNDED); //수정
             cancellationDAO.insert(conn, cancellation); // conn 넘김
             
             tm.commit();
@@ -77,5 +80,42 @@ public class BookingService {
         } finally {
             tm.end();
         }
+    }
+    
+    //수수료 계산 메서드 추가
+    public int calculateCancellationFee(BookingDTO booking) {
+
+        LocalDateTime startTime =
+                bookingDAO.getPerformanceStartTime(
+                        booking.getBookingId()
+                );
+
+        long daysUntilPerformance =
+                ChronoUnit.DAYS.between(
+                        LocalDate.now(),
+                        startTime.toLocalDate()
+                );
+        
+        double rate;
+
+        if (daysUntilPerformance < 0) {
+            throw new RuntimeException("공연 종료 후에는 취소할 수 없습니다.");
+        }
+        else if (daysUntilPerformance == 0) {
+            rate = 0.70;
+        }
+        else if (daysUntilPerformance <= 2) {
+            rate = 0.30;
+        }
+        else if (daysUntilPerformance <= 6) {
+            rate = 0.20;
+        }
+        else if (daysUntilPerformance <= 9) {
+            rate = 0.10;
+        }
+        else {
+            rate = 0.07;
+        }
+        return (int)(booking.getPayment() * rate);
     }
 }

@@ -7,8 +7,7 @@ import java.util.Scanner;
 public class CancellationView {
     private final Scanner sc = new Scanner(System.in);
 
-    public boolean confirmCancel(BookingDTO booking) {
-        int fee = (int)(booking.getPayment() * 0.1);
+    public boolean confirmCancel(BookingDTO booking, int fee) {
         int refund = booking.getPayment() - fee;
         System.out.println("=== 예매 취소 ==============");
         System.out.printf("결제금액   : %,d원%n", booking.getPayment());
