@@ -80,7 +80,7 @@ CREATE TABLE IF NOT EXISTS booking (
 		'HOLD', 'BOOKED', 'CANCELED'
 		) NOT NULL DEFAULT 'HOLD',
 	booked_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-	payment INT,
+	payment INT CHECK (payment >= 0),
 	FOREIGN KEY (member_id) REFERENCES member(member_id) 
 		ON DELETE CASCADE, -- 해당 회원 삭제되면 예매도 삭제
 	FOREIGN KEY(performance_seat_id) REFERENCES performance_seat(performance_seat_id)
@@ -105,12 +105,13 @@ CREATE TABLE IF NOT EXISTS review (
 -- 취소 테이블
 CREATE TABLE IF NOT EXISTS cancellation (
 	booking_id INT PRIMARY KEY,
-	refund_amount INT NOT NULL,
+	refund_amount INT NOT NULL CHECK (refund_amount >= 0),
 	canceled_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-	cancellation_fee INT NOT NULL DEFAULT 0,
+	cancellation_fee INT NOT NULL DEFAULT 0 CHECK (cancellation_fee>=0),
 	cancel_status ENUM(
 		'REQUESTED', 'PENDING_REFUND', 'REFUNDED'
 		) NOT NULL DEFAULT 'REQUESTED',
+	CONSTRAINT chk_refund_fee CHECK (refund_amount >= cancellation_fee),
 	FOREIGN KEY(booking_id) REFERENCES booking(booking_id)
 		ON DELETE CASCADE
 	);
