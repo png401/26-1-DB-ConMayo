@@ -1,6 +1,7 @@
 # 26-1-DB-ConMayo
 26년 1학기 데이터베이스 수업 공연예매 관리 프로젝트 
 
+```
 classDiagram
     direction TOP_DOWN
 
@@ -82,3 +83,4 @@ classDiagram
     UserRepository ..> UserDTO : 데이터 전달
     RecipeRepository ..> RecipeDTO : 데이터 전달
     MenuController ..> UserDTO : 세션 유지
+```
