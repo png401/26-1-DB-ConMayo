@@ -94,7 +94,11 @@ public class ReviewController {
             boolean success = reviewService.updateReview(target);
             reviewView.showMessage(success ? "리뷰가 수정되었습니다." : "리뷰 수정에 실패했습니다.");
         } else {
-            // 리뷰 없으면 작성
+        	// 리뷰 없으면 작성 — 팝업 뜨기 전에 먼저 검사
+            if (!reviewService.canWriteReview(bookingId)) {
+                System.out.println("공연 시작 후에만 리뷰를 작성할 수 있습니다.");
+                return;
+            }
             writeReview(bookingId);
         }
     }
