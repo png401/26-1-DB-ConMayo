@@ -70,10 +70,14 @@ public class BookingController {
     private boolean handleCancel(BookingDTO booking) {
         CancellationView cancelView = new CancellationView();
         //수정
-        int fee =
-                bookingService.calculateCancellationFee(
-                        booking
-                );
+        int fee;
+        try {
+            fee = bookingService.calculateCancellationFee(booking);
+        } catch (RuntimeException e) {
+            bookingView.printError(e.getMessage()); // "공연 종료 후에는 취소할 수 없습니다."
+            return false;
+        }
+        
         if (!cancelView.confirmCancel(booking, fee)) {
             System.out.println("취소를 중단했습니다.");
             return false;

@@ -72,5 +72,13 @@ public class ReviewService {
         }
         return reviewDAO.update(review);
     }
+    
+    //리뷰 작성 안되는 것 미리 체크하기 
+    public boolean canWriteReview(int bookingId) {
+        BookingDTO booking = bookingDAO.findById(bookingId);
+        if (booking == null || booking.getBookingStatus() != BookingStatus.BOOKED) return false;
+        LocalDateTime startTime = bookingDAO.getPerformanceStartTime(bookingId);
+        return startTime != null && !LocalDateTime.now().isBefore(startTime);
+    }
 
 }
