@@ -14,10 +14,11 @@ public class MemberView {
     	System.out.println();
     	System.out.print("선택 > ");
 
-    	int menu = sc.nextInt();
-    	sc.nextLine();
-    	
-    	return menu;
+    	try {
+            return Integer.parseInt(sc.nextLine().trim());
+        } catch (NumberFormatException e) {
+            return -1;
+        }
     	
     }
     
