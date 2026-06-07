@@ -50,7 +50,23 @@ public class VenueController {
             adminView.printError("⚠ 공연장 주소는 필수 입력 사항입니다.\n");
         }
 
-        venueService.addVenue(name, address);
+        int venueId = venueService.addVenue(name, address); //수정: addVenue() 의 결과로 공연장아이디 받아오기
+        int sectionCount =
+                venueView.inputSectionCount();
+
+        for (int i = 0; i < sectionCount; i++) {
+
+            System.out.println(
+                "\n[" + (i + 1) + "번째 구역]"
+            );
+
+            //구,행,열 받아오기
+            String section = venueView.inputSectionName();
+            int rows = venueView.inputRows();
+            int cols = venueView.inputCols();
+
+            venueService.createSeatsForVenue(venueId, section,rows,cols);
+        }
         adminView.printSuccess("공연장이 성공적으로 등록되었습니다.");
         showAll(); // 등록 후 목록 갱신
     }
@@ -90,7 +106,24 @@ public class VenueController {
             adminView.printError("삭제하려는 공연장이 존재하지 않습니다. (ID: " + venueId + ")");
             return; 
         }
-        
+        //추가 - 공연장에 등록된 공연이 있는지 확인하는 로직 추가
+        if (venueService.hasPerformance(venueId)) {
+
+            System.out.println();
+            System.out.println("⚠ 해당 공연장에 등록된 공연이 존재합니다.");
+            System.out.println("공연장을 삭제하면 관련 공연, 좌석, 예매 정보도 함께 삭제됩니다.");
+            System.out.print("정말 삭제하시겠습니까? (y/n) > ");
+
+            String answer =
+                    new java.util.Scanner(System.in)
+                            .nextLine()
+                            .trim();
+
+            if (!answer.equalsIgnoreCase("y")) {
+                System.out.println("공연장 삭제가 취소되었습니다.");
+                return;
+            }
+        }
         venueService.removeVenue(venueId);
         adminView.printSuccess("공연장이 삭제되었습니다.");
         showAll();

@@ -177,5 +177,38 @@ public class SeatDAOImpl implements SeatDAO {
 	     }
 	     return list;
 	 }
+	 //추가
+	 //새 venue 등록시 매핑시킬 seat들을 생성
+	 @Override
+	 public void createSeatsForVenue(
+	         int venueId,
+	         String section,
+	         int rows,
+	         int cols) {
+
+	     String sql =
+	         "INSERT INTO seat(venue_id, section, row_num, col_num) VALUES (?, ?, ?, ?)";
+
+	     try (Connection conn = DatabaseConnector.getConnection();
+	          PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+	         for (int r = 1; r <= rows; r++) {
+	             for (int c = 1; c <= cols; c++) {
+
+	                 pstmt.setInt(1, venueId);
+	                 pstmt.setString(2, section);
+	                 pstmt.setInt(3, r);
+	                 pstmt.setInt(4, c);
+
+	                 pstmt.addBatch();
+	             }
+	         }
+
+	         pstmt.executeBatch();
+
+	     } catch (SQLException e) {
+	         throw new RuntimeException(e);
+	     }
+	 }
     
 }
