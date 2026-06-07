@@ -8,4 +8,5 @@ public interface VenueDAO {
     									   // 수정 void->int: insert 시 공연장아이디 받기
     void update(VenueDTO venue);            // 공연장 정보 수정 (관리자)
     void delete(int venueId);              // 공연장 삭제 (관리자)
+    boolean hasPerformance(int venueId);	// 추가: 해당 공연장에 등록된 공연이 있는지 확인
 }

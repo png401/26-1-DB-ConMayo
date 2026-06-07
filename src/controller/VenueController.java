@@ -106,7 +106,24 @@ public class VenueController {
             adminView.printError("삭제하려는 공연장이 존재하지 않습니다. (ID: " + venueId + ")");
             return; 
         }
-        
+        //추가 - 공연장에 등록된 공연이 있는지 확인하는 로직 추가
+        if (venueService.hasPerformance(venueId)) {
+
+            System.out.println();
+            System.out.println("⚠ 해당 공연장에 등록된 공연이 존재합니다.");
+            System.out.println("공연장을 삭제하면 관련 공연, 좌석, 예매 정보도 함께 삭제됩니다.");
+            System.out.print("정말 삭제하시겠습니까? (y/n) > ");
+
+            String answer =
+                    new java.util.Scanner(System.in)
+                            .nextLine()
+                            .trim();
+
+            if (!answer.equalsIgnoreCase("y")) {
+                System.out.println("공연장 삭제가 취소되었습니다.");
+                return;
+            }
+        }
         venueService.removeVenue(venueId);
         adminView.printSuccess("공연장이 삭제되었습니다.");
         showAll();

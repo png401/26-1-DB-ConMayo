@@ -142,4 +142,31 @@ public class VenueDAOImpl implements VenueDAO {
             e.printStackTrace();
         }
     }
+    
+    // 추가
+    // 해당 공연장에 등록된 공연이 있는지 확인하는 메소드
+    @Override
+    public boolean hasPerformance(int venueId) {
+
+        String sql =
+                "SELECT COUNT(*) FROM performance WHERE venue_id = ?";
+
+        try (Connection conn = DatabaseConnector.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setInt(1, venueId);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+
+                if (rs.next()) {
+                    return rs.getInt(1) > 0;
+                }
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+        return false;
+    }
 }

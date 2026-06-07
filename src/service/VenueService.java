@@ -72,4 +72,9 @@ public class VenueService {
     public void createSeatsForVenue(int venueId, String section, int rows, int cols) {
         seatDAO.createSeatsForVenue( venueId, section, rows, cols);
     }
+    
+    // 추가 - 공연장에 등록된 공연이 있으면 true 반환
+    public boolean hasPerformance(int venueId) {
+        return venueDAO.hasPerformance(venueId);
+    }
 }
