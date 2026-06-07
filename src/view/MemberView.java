@@ -1,5 +1,7 @@
 package view;
 import dto.MemberDTO;
+
+import java.util.InputMismatchException;
 import java.util.Scanner;
 public class MemberView {
     private final Scanner sc = new Scanner(System.in);
@@ -23,19 +25,27 @@ public class MemberView {
     }
     
     public int showUserMenu() {
-    	System.out.println("\n====== 회원 메뉴 ======");
-    	System.out.println("1. 공연 조회");
-    	System.out.println("2. 내 예매 조회");
-    	System.out.println("3. 내 리뷰 조회/수정");   // 추가
-        System.out.println("4. 공연장 리뷰 조회");     // 추가
-    	System.out.println("0. 로그아웃");
-    	System.out.println();
-    	System.out.print("선택 > ");
+        while (true) {
+            try {
+                System.out.println("\n====== 회원 메뉴 ======");
+                System.out.println("1. 공연 조회");
+                System.out.println("2. 내 예매 조회");
+                System.out.println("3. 내 리뷰 조회/수정");
+                System.out.println("4. 공연장 리뷰 조회");
+                System.out.println("0. 로그아웃");
+                System.out.println();
+                System.out.print("선택 > ");
 
-        int menu = sc.nextInt();
-        sc.nextLine();
+                int menu = sc.nextInt();
+                sc.nextLine();
 
-        return menu;
+                return menu;
+
+            } catch (InputMismatchException e) {
+                System.out.println("올바른 숫자를 입력해주세요.");
+                sc.nextLine(); // 잘못 입력된 값 제거
+            }
+        }
     }
     
  // 아이디 입력받기
