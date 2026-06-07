@@ -57,14 +57,45 @@ public class PerformanceService {
     }
     
     
-    // 5. 공연 수정 (관리자)
+ // 5. 공연 수정 (관리자)
     public void modifyPerformance(PerformanceDTO performance) {
         PerformanceDTO exist = performanceDAO.findById(performance.getPerformanceId());
         if (exist == null) {
             System.out.println("오류: 수정하려는 공연이 존재하지 않습니다.");
             return;
         }
+        
+        // 공연장 변경 여부 확인
+        boolean venueChanged =
+                exist.getVenueId()
+                != performance.getVenueId();
+        
+        // 공연장 변경 시
+        if (venueChanged) {
+            adjustSalesStatus(exist);
+            if (exist.getSalesStatus()
+                    != SalesStatus.COMING_SOON) {
+                throw new RuntimeException(
+                        "COMING_SOON 상태의 공연만 공연장을 변경할 수 있습니다."
+                );
+            }
+        }
+       
+        // 공연 정보 수정
         performanceDAO.update(performance);
+
+        // 공연장이 변경된 경우 performance_seat 재생성
+        if (venueChanged) {
+
+            perfSeatDAO.deleteByPerformanceId(
+                    performance.getPerformanceId()
+            );
+
+            perfSeatDAO.createSeatsForPerformance(
+                    performance.getPerformanceId(),
+                    performance.getVenueId()
+            );
+        }
     }
     
     // 6. 공연 삭제 (관리자)

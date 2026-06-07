@@ -4,6 +4,7 @@ import java.util.List;
 public interface PerformanceSeatDAO {
     List<PerformanceSeatDTO> findByPerformance(int performanceId);   // 공연별 좌석-가격 목록 조회
     void insert(PerformanceSeatDTO performanceSeat);                        // 공연좌석 등록 (관리자)
-    void createSeatsForPerformance(int performanceId, int venueId); //추가, 공연 추가 시 공연좌석 한번에 등록(관리자)
+    void createSeatsForPerformance(int performanceId, int venueId); // 추가, 공연 추가 시 공연좌석 한번에 등록(관리자)
     void updatePrice(int performanceSeatId, int price);              // 좌석 가격 수정 (관리자)
+    void deleteByPerformanceId(int performanceId); // 추가, 공연장 변경 시 해당 공연좌석 정보 전부 삭제
 }

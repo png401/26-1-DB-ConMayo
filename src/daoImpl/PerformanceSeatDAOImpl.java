@@ -134,4 +134,29 @@ public class PerformanceSeatDAOImpl implements PerformanceSeatDAO {
             e.printStackTrace();
         }
     }
+    
+    //추가
+    //공연장 변경 시 공연좌석 정보 한번에 지우는 메소드 구현
+    @Override
+    public void deleteByPerformanceId(
+            int performanceId
+    ) {
+        String sql =
+                """
+                DELETE FROM performance_seat
+                WHERE performance_id = ?
+                """;
+
+        try (Connection conn = DatabaseConnector.getConnection();
+             PreparedStatement pstmt =
+                     conn.prepareStatement(sql)) {
+
+            pstmt.setInt(1, performanceId);
+            pstmt.executeUpdate();
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    
 }
