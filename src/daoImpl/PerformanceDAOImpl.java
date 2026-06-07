@@ -5,6 +5,7 @@ import db.DatabaseConnector;
 import dto.PerformanceDTO;
 import dto.SalesStatus;
 
+import java.sql.Statement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -121,14 +122,19 @@ public class PerformanceDAOImpl implements PerformanceDAO {
     }
 
     @Override
-    public void insert(PerformanceDTO performance) {
+    public int insert(PerformanceDTO performance) {
         // INSERT INTO performance (title, category, start_time, running_time,
         //   sales_status, booking_open, venue_id) VALUES (?,?,?,?,?,?,?)
         String sql = "INSERT INTO performance (title, category, start_time, running_time, sales_status, booking_open, venue_id) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?)";
 
         try (Connection conn = DatabaseConnector.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        	// PreparedStatement pstmt = conn.prepareStatement(sql))
+        	PreparedStatement pstmt =
+        		        conn.prepareStatement(
+        		                sql,
+        		                Statement.RETURN_GENERATED_KEYS))
+        {
             pstmt.setString(1, performance.getTitle());
             pstmt.setString(2, performance.getCategory());
             pstmt.setTimestamp(3, Timestamp.valueOf(performance.getStartTime()));
@@ -137,9 +143,18 @@ public class PerformanceDAOImpl implements PerformanceDAO {
             pstmt.setTimestamp(6, Timestamp.valueOf(performance.getBookingOpen()));
             pstmt.setInt(7, performance.getVenueId());
             pstmt.executeUpdate();
+            // 수정 - 공연 아이디 받아오기
             System.out.println("공연 등록 성공: " + performance.getTitle());
+            try (ResultSet rs = pstmt.getGeneratedKeys()) {
+                if (rs.next()) {
+                    int performanceId = rs.getInt(1);
+                    System.out.println("생성된 공연 ID = " + performanceId);
+                    return performanceId;
+                }
+            }
+            throw new RuntimeException("생성된 공연 ID를 가져오지 못했습니다.");
         } catch (SQLException e) {
-        	throw new RuntimeException("DB 공연 등록 실패: " + e.getMessage(), e);
+            throw new RuntimeException( "DB 공연 등록 실패: " + e.getMessage(), e);
         }
     }
 

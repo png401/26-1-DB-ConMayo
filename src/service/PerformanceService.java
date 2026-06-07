@@ -1,6 +1,7 @@
 // PerformanceService.java
 package service;
 import dao.PerformanceDAO;
+import dao.PerformanceSeatDAO;
 import dto.PerformanceDTO;
 import dto.SalesStatus;
 
@@ -8,7 +9,11 @@ import java.time.LocalDateTime;
 import java.util.List;
 public class PerformanceService {
     private final PerformanceDAO performanceDAO;
-    public PerformanceService(PerformanceDAO performanceDAO) { this.performanceDAO = performanceDAO; }
+    private final PerformanceSeatDAO perfSeatDAO;
+    public PerformanceService(PerformanceDAO performanceDAO, PerformanceSeatDAO perfSeatDAO) {
+    	this.performanceDAO = performanceDAO;
+    	this.perfSeatDAO = perfSeatDAO;
+    }
 
     // 1. 공연 전체 목록 조회
     public List<PerformanceDTO> getAllPerformances() { 
@@ -43,17 +48,54 @@ public class PerformanceService {
             System.out.println("오류: 올바른 공연 정보를 입력하세요.");
             return;
         }
-        performanceDAO.insert(performance);
+        //performanceDAO.insert(performance);
+        // 수정 -> PerformanceDAO의 insert()메소드의 반환형을 int로 바꿈에 따라 insert()하고 공연 아이디를 받아야 한다.
+        int performanceId = performanceDAO.insert(performance); 
+        // 추가 -> PerformanceSeatDAO의 createSeatsForPerformance() 메소드 호출
+        // 받아온 공연아이디와, performance.getVenueId()로 공연장 아이디를 받아서 매개변수로 넘긴다.
+        perfSeatDAO.createSeatsForPerformance(performanceId, performance.getVenueId());
     }
     
-    // 5. 공연 수정 (관리자)
+    
+ // 5. 공연 수정 (관리자)
     public void modifyPerformance(PerformanceDTO performance) {
         PerformanceDTO exist = performanceDAO.findById(performance.getPerformanceId());
         if (exist == null) {
             System.out.println("오류: 수정하려는 공연이 존재하지 않습니다.");
             return;
         }
+        
+        // 공연장 변경 여부 확인
+        boolean venueChanged =
+                exist.getVenueId()
+                != performance.getVenueId();
+        
+        // 공연장 변경 시
+        if (venueChanged) {
+            adjustSalesStatus(exist);
+            if (exist.getSalesStatus()
+                    != SalesStatus.COMING_SOON) {
+                throw new RuntimeException(
+                        "COMING_SOON 상태의 공연만 공연장을 변경할 수 있습니다."
+                );
+            }
+        }
+       
+        // 공연 정보 수정
         performanceDAO.update(performance);
+
+        // 공연장이 변경된 경우 performance_seat 재생성
+        if (venueChanged) {
+
+            perfSeatDAO.deleteByPerformanceId(
+                    performance.getPerformanceId()
+            );
+
+            perfSeatDAO.createSeatsForPerformance(
+                    performance.getPerformanceId(),
+                    performance.getVenueId()
+            );
+        }
     }
     
     // 6. 공연 삭제 (관리자)
