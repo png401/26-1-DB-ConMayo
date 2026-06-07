@@ -32,4 +32,32 @@ public class VenueView {
             }
         }
     }
+    
+    //추가: 구연 개수 받는 메서드
+    public int inputSectionCount() {
+
+        System.out.print("구역 개수 > ");
+        return sc.nextInt();
+    }
+    
+    //추가: 구역 이름 받는 메서드
+    public String inputSectionName() {
+
+        System.out.print("구역명 > ");
+        return sc.next();
+    }
+    
+    //추가: 각 구열 별 행 개수 받는 메서드
+    public int inputRows() {
+
+        System.out.print("행 수 > ");
+        return sc.nextInt();
+    }
+    
+   //추가: 각 구열 별 열 개수 받는 메서드
+    public int inputCols() {
+
+        System.out.print("열 수 > ");
+        return sc.nextInt();
+    }
 }

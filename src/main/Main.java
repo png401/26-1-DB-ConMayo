@@ -66,7 +66,7 @@ public class Main {
         // BookingService는 취소 트랜잭션을 위해 cancellationDAO도 같이 주입
         // ReviewService는 BOOKED 상태 체크를 위해 bookingDAO도 같이 주입
         MemberService memberService             = new MemberService(memberDAO);
-        VenueService venueService               = new VenueService(venueDAO);
+        VenueService venueService               = new VenueService(venueDAO, seatDAO); //수정: seatDAO 추가
         PerformanceService performanceService   = new PerformanceService(performanceDAO, perfSeatDAO); //수정: perfSeatDAO 추가
         SeatService seatService                 = new SeatService(seatDAO);
         PerformanceSeatService perfSeatService  = new PerformanceSeatService(perfSeatDAO);

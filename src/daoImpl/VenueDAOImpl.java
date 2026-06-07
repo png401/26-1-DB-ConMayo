@@ -1,6 +1,7 @@
 package daoImpl;
 
 import dao.VenueDAO;
+
 import db.DatabaseConnector;
 import dto.VenueDTO;
 
@@ -8,8 +9,10 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+
 
 public class VenueDAOImpl implements VenueDAO {
 
@@ -62,22 +65,45 @@ public class VenueDAOImpl implements VenueDAO {
         }
         return null;
     }
-
+    
+    //수정 - 공연장 삽입 이후 공연장 id를 반환하기
     @Override
-    public void insert(VenueDTO venue) {
+    public int insert(VenueDTO venue) {
         // INSERT INTO venue (venue_name, address) VALUES (?, ?)
         // → venue_id는 AUTO_INCREMENT라 생략
         String sql = "INSERT INTO venue (venue_name, address) VALUES (?, ?)";
 
         try (Connection conn = DatabaseConnector.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setString(1, venue.getVenueName());
-            pstmt.setString(2, venue.getAddress());
-            pstmt.executeUpdate();
-            System.out.println("공연장 등록 성공: " + venue.getVenueName());
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+                PreparedStatement pstmt =
+                        conn.prepareStatement(
+                                sql,
+                                Statement.RETURN_GENERATED_KEYS
+                        )) {
+
+               pstmt.setString(1, venue.getVenueName());
+               pstmt.setString(2, venue.getAddress());
+
+               pstmt.executeUpdate();
+
+               try (ResultSet rs = pstmt.getGeneratedKeys()) {
+                   if (rs.next()) {
+                       int venueId = rs.getInt(1);
+
+                       System.out.println("공연장 등록 성공: " + venue.getVenueName());
+                       System.out.println("생성된 공연장 ID = " + venueId);
+
+                       return venueId;
+                   }
+               }
+
+               throw new RuntimeException("생성된 공연장 ID를 가져오지 못했습니다.");
+
+           } catch (SQLException e) {
+               throw new RuntimeException(
+                       "공연장 등록 실패: " + e.getMessage(),
+                       e
+               );
+           }
     }
 
     @Override

@@ -50,7 +50,23 @@ public class VenueController {
             adminView.printError("⚠ 공연장 주소는 필수 입력 사항입니다.\n");
         }
 
-        venueService.addVenue(name, address);
+        int venueId = venueService.addVenue(name, address); //수정: addVenue() 의 결과로 공연장아이디 받아오기
+        int sectionCount =
+                venueView.inputSectionCount();
+
+        for (int i = 0; i < sectionCount; i++) {
+
+            System.out.println(
+                "\n[" + (i + 1) + "번째 구역]"
+            );
+
+            //구,행,열 받아오기
+            String section = venueView.inputSectionName();
+            int rows = venueView.inputRows();
+            int cols = venueView.inputCols();
+
+            venueService.createSeatsForVenue(venueId, section,rows,cols);
+        }
         adminView.printSuccess("공연장이 성공적으로 등록되었습니다.");
         showAll(); // 등록 후 목록 갱신
     }
