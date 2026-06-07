@@ -67,7 +67,7 @@ public class Main {
         // ReviewService는 BOOKED 상태 체크를 위해 bookingDAO도 같이 주입
         MemberService memberService             = new MemberService(memberDAO);
         VenueService venueService               = new VenueService(venueDAO);
-        PerformanceService performanceService   = new PerformanceService(performanceDAO);
+        PerformanceService performanceService   = new PerformanceService(performanceDAO, perfSeatDAO); //수정: perfSeatDAO 추가
         SeatService seatService                 = new SeatService(seatDAO);
         PerformanceSeatService perfSeatService  = new PerformanceSeatService(perfSeatDAO);
         BookingService bookingService           = new BookingService(bookingDAO, cancellationDAO, tm);

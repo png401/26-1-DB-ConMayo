@@ -1,6 +1,7 @@
 // PerformanceService.java
 package service;
 import dao.PerformanceDAO;
+import dao.PerformanceSeatDAO;
 import dto.PerformanceDTO;
 import dto.SalesStatus;
 
@@ -8,7 +9,11 @@ import java.time.LocalDateTime;
 import java.util.List;
 public class PerformanceService {
     private final PerformanceDAO performanceDAO;
-    public PerformanceService(PerformanceDAO performanceDAO) { this.performanceDAO = performanceDAO; }
+    private final PerformanceSeatDAO perfSeatDAO;
+    public PerformanceService(PerformanceDAO performanceDAO, PerformanceSeatDAO perfSeatDAO) {
+    	this.performanceDAO = performanceDAO;
+    	this.perfSeatDAO = perfSeatDAO;
+    }
 
     // 1. 공연 전체 목록 조회
     public List<PerformanceDTO> getAllPerformances() { 
@@ -43,8 +48,14 @@ public class PerformanceService {
             System.out.println("오류: 올바른 공연 정보를 입력하세요.");
             return;
         }
-        performanceDAO.insert(performance);
+        //performanceDAO.insert(performance);
+        // 수정 -> PerformanceDAO의 insert()메소드의 반환형을 int로 바꿈에 따라 insert()하고 공연 아이디를 받아야 한다.
+        int performanceId = performanceDAO.insert(performance); 
+        // 추가 -> PerformanceSeatDAO의 createSeatsForPerformance() 메소드 호출
+        // 받아온 공연아이디와, performance.getVenueId()로 공연장 아이디를 받아서 매개변수로 넘긴다.
+        perfSeatDAO.createSeatsForPerformance(performanceId, performance.getVenueId());
     }
+    
     
     // 5. 공연 수정 (관리자)
     public void modifyPerformance(PerformanceDTO performance) {

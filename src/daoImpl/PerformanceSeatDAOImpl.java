@@ -75,6 +75,46 @@ public class PerformanceSeatDAOImpl implements PerformanceSeatDAO {
             e.printStackTrace();
         }
     }
+    
+    //추가
+    //새로운 공연 추가 시 받아온 performanceId 가지고 공연좌석들 여러개를 생성
+    @Override
+    public void createSeatsForPerformance(
+            int performanceId,
+            int venueId
+    ) {
+        String sql =
+                """
+                INSERT INTO performance_seat
+                (performance_id, seat_id, price)
+                SELECT
+                    ?,
+                    seat_id,
+                    CASE
+                        WHEN section IN ('VIP','STANDING','GROUND')
+                            THEN 180000
+                        WHEN section IN ('R','1층')
+                            THEN 150000
+                        WHEN section IN ('S','2층')
+                            THEN 120000
+                        ELSE 99000
+                    END
+                FROM seat
+                WHERE venue_id = ?
+                """;
+
+        try (Connection conn = DatabaseConnector.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setInt(1, performanceId);
+            pstmt.setInt(2, venueId);
+
+            pstmt.executeUpdate();
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     @Override
     public void updatePrice(int performanceSeatId, int price) {
