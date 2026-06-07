@@ -2,6 +2,7 @@ package controller;
 import java.util.List;
 import dto.PerformanceDTO;
 import dto.PerformanceSeatDTO; //추가
+import dto.SalesStatus;
 import service.PerformanceSeatService;
 import service.PerformanceService;
 import view.AdminView;
@@ -204,13 +205,15 @@ public class PerformanceController {
             adminView.printError("존재하지 않는 공연 ID입니다.");
             return;
         }
-        
-        var seatList = perfSeatService.getSeatsByPerformance(performanceId);
-        if (seatList != null && !seatList.isEmpty()) {
-            System.out.println("\n❌ [삭제 불가] 관객의 예매 정보나 좌석 배치가 남아있는 공연은 삭제할 수 없습니다.");
-            return; // 쿼리를 날리지 않고 여기서 바로 함수 종료
-        }
-        
+        //공연 삭제 가능 여부 판단 기준 수정
+        if (targetPerf.getSalesStatus() == SalesStatus.OPEN ||
+        	    targetPerf.getSalesStatus() == SalesStatus.SOLD_OUT) {
+
+        	    adminView.printError(
+        	        "OPEN 또는 SOLD_OUT 상태의 공연은 삭제할 수 없습니다."
+        	    );
+        	    return;
+        	}
         if (!performanceView.confirmDelete(targetPerf.getTitle())) {
             System.out.println("❌ 공연 삭제가 취소되었습니다.");
             return;
