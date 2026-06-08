@@ -8,7 +8,9 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Scanner;
-import java.util.Map; 
+import java.util.Map;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashMap; 
 import controller.SeatController;
 
@@ -84,24 +86,52 @@ public class PerformanceView {
 
         	System.out.println("\n=== 좌석 가격 ==="); 
  
-        	Map<String, Integer> priceMap = new LinkedHashMap<>(); 
- 
-        	for (PerformanceSeatDTO seat : seatList) { 
- 
-        	    String section = seat.getSection(); 
- 
-        	    if (section == null) { 
-        	        section = "UNKNOWN"; 
-        	    } 
- 
-        	    priceMap.putIfAbsent(section, seat.getPrice()); 
-        	} 
- 
-        	for (Map.Entry<String, Integer> entry : priceMap.entrySet()) { 
-        	    System.out.printf("%-10s : %,d원\n", 
-        	            entry.getKey(), 
-        	            entry.getValue()); 
-        	} 
+        	Map<String, List<Integer>> sectionPrices =
+        	        new LinkedHashMap<>();
+
+        	for (PerformanceSeatDTO seat : seatList) {
+
+        	    String section = seat.getSection();
+
+        	    if (section == null) {
+        	        section = "UNKNOWN";
+        	    }
+
+        	    sectionPrices
+        	            .computeIfAbsent(
+        	                    section,
+        	                    k -> new ArrayList<>()
+        	            )
+        	            .add(seat.getPrice());
+        	}
+        	
+        	for (Map.Entry<String, List<Integer>> entry
+        	        : sectionPrices.entrySet()) {
+
+        	    int minPrice =
+        	            Collections.min(entry.getValue());
+
+        	    int maxPrice =
+        	            Collections.max(entry.getValue());
+
+        	    if (minPrice == maxPrice) {
+
+        	        System.out.printf(
+        	                "%-10s : %,d원%n",
+        	                entry.getKey(),
+        	                minPrice
+        	        );
+
+        	    } else {
+
+        	        System.out.printf(
+        	                "%-10s : %,d ~ %,d원%n",
+        	                entry.getKey(),
+        	                minPrice,
+        	                maxPrice
+        	        );
+        	    }
+        	}
         }
         
         System.out.println("1. 예매하기 0. 뒤로");
