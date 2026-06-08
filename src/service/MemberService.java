@@ -84,4 +84,9 @@ public class MemberService {
     	return 0;
     }
     
+    //추가
+    public List<Object[]> getRecentCancellationCounts() {
+        return memberDAO.getRecentCancellationCounts();
+    }
+    
 }

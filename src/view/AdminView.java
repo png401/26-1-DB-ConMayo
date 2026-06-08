@@ -109,11 +109,10 @@ public class AdminView {
     } 
     
  // 블랙리스트 등록/해제할 회원 ID 입력받기
-    public String inputMemberIdToBlacklist() { 
-    	System.out.print("블랙리스트 회원 ID > ");
-    	return sc.nextLine();
+    public String inputMemberIdToBlacklist() {
+        System.out.print("회원 ID (0: 취소) > ");
+        return sc.nextLine().trim();
     }
-    
  // 공연 ID 입력받기
     public int inputPerformanceId() { 
     	System.out.print("공연 ID > ");

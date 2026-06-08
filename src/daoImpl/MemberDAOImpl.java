@@ -213,4 +213,39 @@ public class MemberDAOImpl implements MemberDAO {
         }
         return false;
     }
+    
+    // 추가
+    // 최근 7일간 취소 횟수 리턴
+    @Override
+    public List<Object[]> getRecentCancellationCounts() {
+
+        List<Object[]> result = new ArrayList<>();
+
+        String sql =
+                "SELECT b.member_id, COUNT(*) AS cancel_count " +
+                "FROM booking b " +
+                "JOIN cancellation c " +
+                "ON b.booking_id = c.booking_id " +
+                "WHERE c.canceled_at >= DATE_SUB(NOW(), INTERVAL 7 DAY) " +
+                "GROUP BY b.member_id " +
+                "ORDER BY cancel_count DESC";
+
+        try (Connection conn = DatabaseConnector.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+
+            while (rs.next()) {
+
+                result.add(new Object[] {
+                        rs.getString("member_id"),
+                        rs.getInt("cancel_count")
+                });
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return result;
+    }
 }
