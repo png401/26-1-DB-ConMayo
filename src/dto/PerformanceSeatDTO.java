@@ -8,6 +8,8 @@ public class PerformanceSeatDTO {
     private int price;			// 해당 공연에서의 좌석 가격
     private boolean isBooked;	// 예약 여부 (BOOKED/HOLD면 true)
     private String section;		// 좌석 등급 보관할 필드
+    private int rowNum;			// 추가 - 행 정보
+    private int colNum;			// 추가 - 열 정보
 
     public PerformanceSeatDTO() {}
 
@@ -65,6 +67,23 @@ public class PerformanceSeatDTO {
 
 	public void setSection(String section) {
 		this.section = section;
+	}
+	
+	// 추가
+	public int getRowNum() {
+	    return rowNum;
+	}
+
+	public void setRowNum(int rowNum) {
+	    this.rowNum = rowNum;
+	}
+
+	public int getColNum() {
+	    return colNum;
+	}
+
+	public void setColNum(int colNum) {
+	    this.colNum = colNum;
 	}
     
 }
