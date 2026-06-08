@@ -349,7 +349,12 @@ public class MemberController {
     	}
     	
         String memberId = adminView.inputMemberIdToBlacklist();
-
+        	
+        // 추가 (0: 되돌아가기)
+        if ("0".equals(memberId)) {
+            return;
+        }
+       
         boolean success = memberService.addToBlacklist(memberId);
         
         if (success) {
@@ -366,7 +371,12 @@ public class MemberController {
     	showBlacklist();
     	
         String memberId = adminView.inputMemberIdToBlacklist();
-
+        
+        // 추가 (0: 되돌아가기)
+        if ("0".equals(memberId)) {
+            return;
+        }
+        
         int result = memberService.releaseBlacklist(memberId);
 
         if (result == 0) {
