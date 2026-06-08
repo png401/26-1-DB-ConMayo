@@ -26,12 +26,14 @@ public class PerformanceSeatDAOImpl implements PerformanceSeatDAO {
                 "       ps.seat_id, " +
                 "       ps.price, " +
                 "       s.section, " +
+                "       s.row_num, " + //추가
+                "       s.col_num, " + //추가
                 "       b.booking_status " +
                 "FROM performance_seat ps " +
                 "JOIN seat s ON ps.seat_id = s.seat_id " +
                 "LEFT JOIN booking b ON ps.performance_seat_id = b.performance_seat_id " +
                 "                  AND b.booking_status IN ('HOLD', 'BOOKED') " +
-                "WHERE ps.performance_id = ?"; // 쿼리 수정 - seat 조인 추가
+                "WHERE ps.performance_id = ?"; 
 
         try (Connection conn = DatabaseConnector.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -43,10 +45,18 @@ public class PerformanceSeatDAOImpl implements PerformanceSeatDAO {
                             rs.getInt("performance_id"),
                             rs.getInt("seat_id"),
                             rs.getInt("price")
+                            
                     );
-                    // 추가
                     perfSeat.setSection(rs.getString("section"));
                     // booking_status가 존재한다면 이미 예약(선점)된 좌석이므로 true로 세팅
+                    // 추가
+                    perfSeat.setRowNum(
+                            rs.getInt("row_num")
+                    );
+
+                    perfSeat.setColNum(
+                            rs.getInt("col_num")
+                    );
                     String status = rs.getString("booking_status");
                     perfSeat.setBooked(status != null);
                     list.add(perfSeat);

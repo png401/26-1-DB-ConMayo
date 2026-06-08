@@ -1,5 +1,8 @@
 package controller;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Scanner;
+import java.util.Set;
 
 import dto.PerformanceDTO;
 import dto.PerformanceSeatDTO;
@@ -73,9 +76,79 @@ public class PerformanceSeatController {
             adminView.printError("존재하지 않는 공연 ID입니다.");
             return;
         }
-        showSeats(targetPerformanceId);
-
+        // 삭제: showSeats(targetPerformanceId);
+        // 구역 선택 받고 이후 해당 구역의 모든 좌석 정보 출력하는 것으로 수정
+        
+        List<PerformanceSeatDTO> seatList =
+                performanceSeatService.getSeatsByPerformance(
+                        targetPerformanceId
+                );
+        // 공연 좌석 id 입력받는 부분 위치 이동 -> 좌석 정보 출력 이후로
+        /*
     	int perfSeatId = adminView.inputPerformanceSeatId(); 
+        if (perfSeatId <= 0) {
+            adminView.printError("잘못된 공연좌석 번호입니다.");
+            return;
+        }
+        */
+        
+        // 구역 정보 출력
+        System.out.println("\n===== 구역 목록 =====");
+
+        Set<String> sections = new LinkedHashSet<>();
+
+        for (PerformanceSeatDTO seat : seatList) {
+            sections.add(seat.getSection());
+        }
+
+        for (String section : sections) {
+            System.out.println("- " + section);
+        }
+        
+        // 구역 선택 입력받기
+        Scanner sc = new Scanner(System.in);
+
+        System.out.print("\n구역 선택 > ");
+
+        String targetSection =
+                sc.nextLine().trim();
+        
+        // 해당 구역의 좌석 정보 전부 출력
+        // 헤더
+        System.out.println(
+                "\n===== "
+                + targetSection
+                + " 좌석 목록 ====="
+        );
+
+        System.out.printf(
+                "%-12s %-10s %-10s%n",
+                "공연좌석ID",
+                "위치",
+                "가격"
+        );
+        // 좌석 정보 출력
+        for (PerformanceSeatDTO seat : seatList) {
+
+            if (!targetSection.equals(
+                    seat.getSection())) {
+                continue;
+            }
+
+            String location =
+                    seat.getRowNum()
+                    + "-"
+                    + seat.getColNum();
+
+            System.out.printf(
+                    "%-12d %-10s %,d원%n",
+                    seat.getPerformanceSeatId(),
+                    location,
+                    seat.getPrice()
+            );
+        }
+        
+        int perfSeatId = adminView.inputPerformanceSeatId();
         if (perfSeatId <= 0) {
             adminView.printError("잘못된 공연좌석 번호입니다.");
             return;
