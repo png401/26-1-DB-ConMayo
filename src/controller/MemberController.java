@@ -361,6 +361,10 @@ public class MemberController {
 
     // 블랙리스트 해제
     public void releaseBlacklist() {
+    	
+    	// 추가: 블리 해제 할 회원 id 입력 전에 현재 블리에 있는 회원 정보를 먼저 출력한다.
+    	showBlacklist();
+    	
         String memberId = adminView.inputMemberIdToBlacklist();
 
         int result = memberService.releaseBlacklist(memberId);
