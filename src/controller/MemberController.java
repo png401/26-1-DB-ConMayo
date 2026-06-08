@@ -324,7 +324,30 @@ public class MemberController {
 
     // 수동 블랙리스트 등록
     public void addBlacklist() {
+    	// 추가
+    	// 수동 블리 등록 전 각 회원별 최근 일주일동안 취소 횟수 출력
+    	List<Object[]> list =
+    	        memberService.getRecentCancellationCounts();
 
+    	System.out.println(
+    	    "\n====== 최근 7일 취소 횟수 ======"
+    	);
+
+    	System.out.printf(
+    	    "%-15s %-10s%n",
+    	    "회원ID",
+    	    "취소횟수"
+    	);
+
+    	for (Object[] row : list) {
+
+    	    System.out.printf(
+    	        "%-15s %-10d%n",
+    	        row[0],
+    	        row[1]
+    	    );
+    	}
+    	
         String memberId = adminView.inputMemberIdToBlacklist();
 
         boolean success = memberService.addToBlacklist(memberId);
@@ -338,7 +361,6 @@ public class MemberController {
 
     // 블랙리스트 해제
     public void releaseBlacklist() {
-
         String memberId = adminView.inputMemberIdToBlacklist();
 
         int result = memberService.releaseBlacklist(memberId);

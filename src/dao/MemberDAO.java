@@ -14,4 +14,5 @@ public interface MemberDAO {
     void setBlacklist(String memberId, LocalDateTime blacklistUntil);	// 블랙리스트 등록 (해제일 설정)
     boolean releaseBlacklist(String memberId);		// 블랙리스트 해제 (NULL로 초기화)
 	boolean existsById(String memberId) throws SQLException;
+	List<Object[]> getRecentCancellationCounts(); // 추가 - 최근 7일 동안 취소 횟수 조회
 }
