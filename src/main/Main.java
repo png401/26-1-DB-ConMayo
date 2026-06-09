@@ -47,6 +47,13 @@ import view.AdminView;
 
 public class Main {
     public static void main(String[] args) {
+    	// ── IP 입력 (팀원 컴끼리 붙을 때만 입력, 로컬이면 Enter) ──
+        java.util.Scanner ipSc = new java.util.Scanner(System.in);
+        System.out.print("DB 서버 IP 입력 (로컬이면 Enter): ");
+        String ip = ipSc.nextLine().trim();
+        if (!ip.isEmpty()) {
+            DatabaseConnector.setHost(ip);
+        }
 
         // ① TransactionManager 생성 — conn 없이 생성 (begin()에서 getConnection() 호출)
         TransactionManager tm = new TransactionManager();
