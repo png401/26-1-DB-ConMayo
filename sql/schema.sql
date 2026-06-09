@@ -48,7 +48,7 @@ CREATE TABLE IF NOT EXISTS performance (
 CREATE TABLE IF NOT EXISTS seat (
 	seat_id INT AUTO_INCREMENT PRIMARY KEY,
 	venue_id INT NOT NULL,
-	section VARCHAR(10) NOT NULL,
+	section VARCHAR(10) NOT NULL CHECK (section <> ''),
 	row_num INT NOT NULL CHECK (row_num >= 1),
 	col_num INT NOT NULL CHECK (col_num >= 1),
 	FOREIGN KEY(venue_id) REFERENCES venue(venue_id)
