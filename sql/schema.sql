@@ -111,7 +111,6 @@ CREATE TABLE IF NOT EXISTS cancellation (
 	cancel_status ENUM(
 		'REQUESTED', 'PENDING_REFUND', 'REFUNDED'
 		) NOT NULL DEFAULT 'REQUESTED',
-	CONSTRAINT chk_refund_fee CHECK (refund_amount >= cancellation_fee),
 	FOREIGN KEY(booking_id) REFERENCES booking(booking_id)
 		ON DELETE CASCADE
 	);
