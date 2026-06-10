@@ -31,10 +31,10 @@ public class DatabaseConnector {
     
     public static void reset() {
         loadProperties("db/db.properties");
-
-        if (!currentHost.equals("localhost")) {
-            URL = URL.replace("localhost", currentHost);
-        }
+        // 아래 코드 삭제해도 됨 (loadProperties에서 처리)
+        // if (!currentHost.equals("localhost")) {
+        //     URL = URL.replace("localhost", currentHost);
+        // }
     }
     
     
@@ -51,6 +51,12 @@ public class DatabaseConnector {
             URL      = props.getProperty("url");
             USER     = props.getProperty("user");
             PASSWORD = props.getProperty("password");
+            
+            // 추가: IP 바꿔놨으면 loadProperties 후에도 유지
+            if (currentHost != null && !currentHost.equals("localhost")) {
+                URL = URL.replace("localhost", currentHost);
+            }
+            
         } catch (IOException e) {
             e.printStackTrace();
         }
