@@ -860,7 +860,7 @@ INSERT INTO booking (booking_id, member_id, performance_seat_id, booking_status,
 (53, 'user01', 4601, 'BOOKED', '2026-05-02 10:20:00', 165000),  -- perf53
 (54, 'user02', 4721, 'BOOKED', '2026-05-02 10:30:00', 165000),  -- perf54
 (55, 'user02', 4841, 'BOOKED', '2026-05-02 10:40:00', 165000),  -- perf55
-(56, 'user02', 4961, 'BOOKED', '2026-05-02 10:50:00', 165000),  -- perf56
+(56, 'user02', 4961, 'BOOKED', '2026-05-02 10:50:00', 165000);  -- perf56
 
 -- =============================================================
 --  7. REVIEW
@@ -1129,16 +1129,6 @@ INSERT INTO review (booking_id, seat_rating, written_at, content) VALUES
 -- =============================================================
 --  8. CANCELLATION
 -- =============================================================
-
--- 취소수수료 시나리오 (booking_id 21~27)
-INSERT INTO cancellation (booking_id, refund_amount, cancellation_fee, canceled_at, cancel_status) VALUES
-(21, 165000,      0, '2026-02-14 10:00:00', 'REFUNDED'),
-(22, 153450,  11550, '2026-02-24 10:00:00', 'REFUNDED'),
-(23, 148500,  16500, '2026-02-28 14:00:00', 'REFUNDED'),
-(24, 132000,  33000, '2026-03-03 10:00:00', 'REFUNDED'),
-(25, 115500,  49500, '2026-03-07 10:00:00', 'REFUNDED'),
-(26,  49500, 115500, '2026-03-10 10:00:00', 'REFUNDED'),
-(27,      0, 165000, '2026-03-12 10:00:00', 'REFUNDED');
 
 -- 블랙리스트 시나리오 취소 내역 (최근 7일: 6/3~6/10 기준)
 INSERT INTO cancellation (booking_id, refund_amount, cancellation_fee, canceled_at, cancel_status) VALUES
