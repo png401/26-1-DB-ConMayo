@@ -8,6 +8,8 @@ GRANT INSERT, UPDATE ON conmayo.review TO 'conmayo_user'@'localhost'; -- 리뷰 
 GRANT INSERT ON conmayo.cancellation TO 'conmayo_user'@'localhost'; -- 취소 요청 생성
 GRANT UPDATE ON conmayo.member TO 'conmayo_user'@'localhost'; -- blacklist_until 갱신 (트리거 보조)
 GRANT EXECUTE ON conmayo.* TO 'conmayo_user'@'localhost'; -- 함수 실행 시 필요
+GRANT INSERT, DELETE, SELECT ON conmayo.waiting_queue TO 'conmayo_user'@'%'; -- 웨이팅큐 인서트
+GRANT INSERT, DELETE, SELECT ON conmayo.waiting_queue TO 'conmayo_user'@'localhost'; -- 웨이팅큐 인서트
 
 -- 관리자용 계정
 CREATE USER IF NOT EXISTS 'conmayo_admin'@'localhost' IDENTIFIED BY 'admin_pw123';
