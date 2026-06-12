@@ -17,6 +17,10 @@ import dto.MemberRole;
 import view.SeatView;
 import dto.SeatDTO;
 
+import dao.WaitingQueueDAO;
+import daoImpl.WaitingQueueDAOImpl;
+import dto.WaitingQueueDTO;
+
 public class MemberController {
     private final MemberService memberService;
     private final MemberView memberView;
@@ -65,14 +69,50 @@ public class MemberController {
 
             switch (menu) {
 
-                case 1:
-                    int performanceId = performanceController.showList();
-                    if (performanceId != 0) {
-                        List<SeatDTO> seats = seatController.openSeatPanel(performanceId);
-                        int availableCount = seatController.getAvailableCount(performanceId);
-                        seatView.showSeatPanel(seats, availableCount, loginMember.getMemberId());
+            case 1:
+                int performanceId = performanceController.showList();
+                if (performanceId != 0) {
+                    // 대기열 입장
+                    WaitingQueueDAO waitingDAO = new WaitingQueueDAOImpl();
+                    WaitingQueueDTO queueDTO = new WaitingQueueDTO(
+                        loginMember.getMemberId(), performanceId);
+                    int myQueueId = waitingDAO.enter(queueDTO);
+
+                    // 폴링 시작
+                    view.BookingView bv = new view.BookingView();
+                    java.util.Timer timer = new java.util.Timer();
+                    boolean[] canEnter = {false}; // 입장 가능 여부 플래그
+
+                    timer.scheduleAtFixedRate(new java.util.TimerTask() {
+                        public void run() {
+                            int remaining = seatController.getAvailableCount(performanceId);
+                            int myRank = waitingDAO.getMyRank(myQueueId, performanceId);
+                            bv.printWaiting(myRank, remaining);
+                            if (myRank == 1) {
+                                canEnter[0] = true;
+                                System.out.println("당신의 순번입니다! Enter를 눌러 입장하세요.");
+                            }
+                        }
+                    }, 0, 1000);
+
+                    // myRank == 1 될 때까지 대기
+                    while (!canEnter[0]) {
+                        try { Thread.sleep(500); } catch (InterruptedException e) {}
                     }
-                    break;
+                    
+                    // 입장 가능해지면 Enter 입력 받음
+                    new java.util.Scanner(System.in).nextLine();
+                    timer.cancel();
+
+                    // 대기열 퇴장
+                    waitingDAO.leave(myQueueId);
+
+                    // 좌석 선택
+                    List<SeatDTO> seats = seatController.openSeatPanel(performanceId);
+                    int availableCount = seatController.getAvailableCount(performanceId);
+                    seatView.showSeatPanel(seats, availableCount, loginMember.getMemberId());
+                }
+                break;
 
                 case 2:
                 	boolean isBlacklisted = (boolean) bookingController.showMyBookings(

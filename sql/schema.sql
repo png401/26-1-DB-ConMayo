@@ -114,7 +114,14 @@ CREATE TABLE IF NOT EXISTS cancellation (
 	FOREIGN KEY(booking_id) REFERENCES booking(booking_id)
 		ON DELETE CASCADE
 	);
-	
+
+-- 웨이팅큐
+CREATE TABLE waiting_queue (
+    queue_id       INT AUTO_INCREMENT PRIMARY KEY,
+    member_id      VARCHAR(50) NOT NULL,
+    performance_id INT NOT NULL,
+    entered_at     DATETIME DEFAULT NOW()
+);
 	
 -- 인덱스
 
