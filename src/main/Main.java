@@ -2,6 +2,7 @@ package main;
 
 // Main.java
 import db.DatabaseConnector;
+import db.DBSetupDialog;
 import db.TransactionManager;
 import dao.MemberDAO;
 import dao.VenueDAO;
@@ -47,12 +48,12 @@ import view.AdminView;
 
 public class Main {
     public static void main(String[] args) {
-    	// ── IP 입력 (팀원 컴끼리 붙을 때만 입력, 로컬이면 Enter) ──
-        java.util.Scanner ipSc = new java.util.Scanner(System.in);
-        System.out.print("DB 서버 IP 입력 (로컬이면 Enter): ");
-        String ip = ipSc.nextLine().trim();
-        if (!ip.isEmpty()) {
-            DatabaseConnector.setHost(ip);
+        // ── DB 연결 설정 ──
+        // 외부 db.properties 없으면 다이얼로그로 host/port/root 비번 입력받아 생성
+        // 이미 있으면 저장된 설정 그대로 사용 (재입력 불필요)
+        if (DatabaseConnector.needsSetup()) {
+            DBSetupDialog.DBConfig config = DBSetupDialog.show();
+            DatabaseConnector.setup(config.host, config.port, config.password);
         }
 
         // ① TransactionManager 생성 — conn 없이 생성 (begin()에서 getConnection() 호출)
