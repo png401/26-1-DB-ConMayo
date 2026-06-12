@@ -14,7 +14,7 @@ MariaDB/MySQL에 접속한 후, `sql/` 경로의 쿼리 파일을 아래 순서�
 | 2 | `sql/security.sql` | `conmayo_user`, `conmayo_admin` 계정 및 권한 생성 |
 | 3 | `sql/db_objects.sql` | 함수/프로시저 등 DB 객체 생성 |
 | 4 | `sql/trigger.sql` | 트리거 생성 |
-| 5 | `sql/data.sql` | 테스트 데이터 삽입 |
+| 5 | `sql/data_0610ver.sql` | 테스트 데이터 삽입 |
 
 ### 2. JAR 실행
 
